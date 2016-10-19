@@ -5,10 +5,10 @@ function _init()
 
 --how many players
 	num_players=2
---starting positions
+--set starting positions
 	player0={x=24,y=64,dx=0,dy=0}
 	player1={x=72,y=64,dx=0,dy=0}
---intialize gravitational pull
+--init gravitational pull ;)
 	gravity=1
 --init player health
 	p0hp=50
@@ -27,8 +27,8 @@ function _update60()
 	player0.dx=0
 	player1.dx=0
 
---move the dudes if someone
---presses a button
+--move the dudes if buttons
+--get pressed
 	movechars()
 	
 end
@@ -61,7 +61,7 @@ end
 
 function checkright(id)
 --set player and opponent
---variables
+--variables for this function
 	if id == player0 then 
 		op = player1
 		controller = 0
@@ -83,7 +83,7 @@ end
 
 function checkleft(id)
 --set player and opponent 
---variables
+--variables for this function
 	if id == player0 then 
 		op = player1
 		controller = 0
