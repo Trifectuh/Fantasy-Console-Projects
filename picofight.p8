@@ -69,14 +69,17 @@ function checkright(id)
 	if id == player1 then 
 		op = player0
 		controller = 1 end
-
---move player if right is 
---pressed
+--check for button press
 	if (btn(1,controller)) then
-		if id.x+18==op.x then
-			id.dx=0
-		else
-			id.dx=1
+--check collision with opponent			
+			if id.x+18==op.x then
+				id.dx=0
+--ignore collision if someone
+--is airborn		
+			if id.y<64 or op.y<64 then
+				id.dx=1 end
+--move right			
+			else id.dx=1
 		end
 	end
 end
@@ -91,14 +94,17 @@ function checkleft(id)
 	if id == player1 then 
 		op = player0
 		controller = 1 end
-
---move player if left is 
---pressed
+--check for button press
 	if (btn(0,controller)) then
-		if id.x-18==op.x then
-			id.dx=0
-		else
-			id.dx=-1
+--check collision with opponent		
+			if id.x-18==op.x then
+				id.dx=0
+--ignore collision if someone
+--is airborn		
+			if id.y<64 or op.y<64 then
+				id.dx=-1 end
+--move left		
+			else id.dx=-1
 		end
 	end
 end
