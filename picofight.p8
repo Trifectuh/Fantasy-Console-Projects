@@ -3,92 +3,124 @@ version 8
 __lua__
 function _init()
 
-num_players=2
-player0={x=24,y=64,dx=0,dy=0}
-player1={x=72,y=64,dx=0,dy=0}
-gravity=1
-p0hp=50
-p1hp=50
+--how many players
+	num_players=2
+--starting positions
+	player0={x=24,y=64,dx=0,dy=0}
+	player1={x=72,y=64,dx=0,dy=0}
+--intialize gravitational pull
+	gravity=1
+--init player health
+	p0hp=50
+	p1hp=50
 
 end
 
 function _update60()
+--check player hp status and
+--end the game if someone falls
+--below zero (lol get gud)
+	if p1hp<=0 then p0win() end
+	if p0hp<=0 then p1win() end
 
---stop chars from sliding
-player0.dx=0
-player1.dx=0
+--stop movement from last frame
+	player0.dx=0
+	player1.dx=0
 
---move p1 right if clear
-if (btn(0,0)) then
-	if player0.x-18==player1.x then
-		player0.dx=0
-		p1hp-=2
-	else
-		player0.dx=-1
-	end
-end
-
---move p1 left if clear
-if (btn(1,0)) then
-	if player0.x+18==player1.x then
-		player0.dx=0
-		p1hp-=2
-	else
-		player0.dx=1
-	end
-end
-	
-if (btn(2,0)) player0.dy=-4
-player0.x+=player0.dx
-player0.y+=player0.dy
-player0.dy=min(player0.dy+
-	gravity,4)
-if (player0.y>64) then 
-	player0.y=64 
-	player0.dy=0
-	end
-	
---move p2 right if clear
-if (btn(0,1)) then
-	if player0.x+18==player1.x then
-		player1.dx=0
-	else
-		player1.dx=-1
-	end
-end
---move p1 left if clear
-if (btn(1,1)) then
-	if player0.x-18==player1.x then
-		player1.dx=0
-	else
-		player1.dx=1
-	end
-end
-
-if (btn(2,1)) player1.dy=-4
-player1.x+=player1.dx
-player1.y+=player1.dy
-player1.dy=min(player1.dy+
-	gravity,4)
-if (player1.y>64) then 
-	player1.y=64 
-	player1.dy=0
-end
-
-if p1hp<=0 then p0win() end
-if p0hp<=0 then p1win() end
+--move the dudes if someone
+--presses a button
+	movechars()
 	
 end
 
 function _draw()
-cls()
-rectfill(0,88,128,100,3)
-rectfill(8,8,8+p0hp,12,9)
-rectfill(70,8,70+p1hp,12,9)
-spr(1,player0.x,player0.y,4,4)
-spr(65,player1.x,player1.y,4,4)
-   
+	cls()
+	rectfill(0,88,128,100,3)
+	rectfill(8,8,8+p0hp,12,9)
+	rectfill(70,8,70+p1hp,12,9)
+	spr(1,player0.x,player0.y,4,4)
+	spr(65,player1.x,player1.y,4,4)
 end
+
+function movechars()
+--call functions to check for
+--button presses and move
+--if necessary
+	
+--player0 (1) calls
+	checkright(player0)
+	checkleft(player0)
+	checkjump(player0)
+
+--player1 (2) calls
+	checkright(player1)
+	checkleft(player1)
+	checkjump(player1)
+	
+end
+
+function checkright(id)
+--set player and opponent
+--variables
+	if id == player0 then 
+		op = player1
+		controller = 0
+		 end
+	if id == player1 then 
+		op = player0
+		controller = 1 end
+
+--move player if right is 
+--pressed
+	if (btn(1,controller)) then
+		if id.x+18==op.x then
+			id.dx=0
+		else
+			id.dx=1
+		end
+	end
+end
+
+function checkleft(id)
+--set player and opponent 
+--variables
+	if id == player0 then 
+		op = player1
+		controller = 0
+		 end
+	if id == player1 then 
+		op = player0
+		controller = 1 end
+
+--move player if left is 
+--pressed
+	if (btn(0,controller)) then
+		if id.x-18==op.x then
+			id.dx=0
+		else
+			id.dx=-1
+		end
+	end
+end
+
+function checkjump(id)
+--super primitive. should be
+--called "fly" instead hehe
+ if id == player0 then 
+		controller = 0
+		 end
+	if id == player1 then 
+		controller = 1 end
+
+	if (btn(2,controller)) id.dy=-4
+		id.x+=id.dx
+		id.y+=id.dy
+		id.dy=min(id.dy+gravity,4)
+		if (id.y>64) then 
+			id.y=64 
+			id.dy=0
+		end
+	end
 __gfx__
 00000000000000000444444444444440000000000000000004444444444444400000000000000000000000000000000000000000000000000000000000000000
 00000000000000000444444444444440000000000000000004444444444444400000000000000000000000000000000000000000000000000000000000000000
