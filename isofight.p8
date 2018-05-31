@@ -81,7 +81,8 @@ function move(char)
   coly=false
  else coly=true end
 
- if char.x-op.x<=9 then
+ if char.x-op.x<=9
+ and op.x-char.x<=0 then
   coll=true
  else coll=false end
 
