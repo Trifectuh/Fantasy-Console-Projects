@@ -20,17 +20,19 @@ function _update60()
 		then win(p[2]) end
 	if p[2].hp<=0 or p[2].stock<=0
 	 then win(p[1]) end
- --stop move from last fame
+ --update characters
  for c in all(p) do
- c.dx=0 c.dy=0 end
- --move/attack
-	for c in all(p) do move(c) end
+  c.dx=0 c.dy=0 
+  move(c)
+  fall(c) end
 end
 
 function _draw()
 	cls()
 	tilemap()
 	drawchars()
+
+ print(p[1].falling)
 end
 
 function drawchars()
@@ -44,6 +46,16 @@ function drawchars()
 	 	p[1].y,1,2,p[1].drc)
 	 	spr(p[2].sprnum,p[2].x,
 	 	p[2].y,1,2,p[2].drc) end
+end
+
+function fall(c)
+ clr=6
+ if pget(c.x-1,c.y+17)!=clr
+ and pget(c.x+8,c.y+17)!=clr
+  then c.falling=true 
+ else c.falling=false end
+ if c.falling == true then
+  c.y+=1 end
 end
 
 function tilemap()
@@ -61,9 +73,25 @@ function tilemap()
 end
 	
 function move(char)
+ if char.id==1 then op=p[2] end
+ if char.id==2 then op=p[1] end
+
+ if char.y<=op.y-5
+ or char.y>=op.y+5 then
+  coly=false
+ else coly=true end
+
+ if char.x-op.x<=9 then
+  coll=true
+ else coll=false end
+
+ if coly and coll then
+  col=true 
+ else col = false end
  ctrl=char.id-1
 	--check for btn then move
-	if btn(0, ctrl) then 
+	if btn(0, ctrl) 
+ and col==false then 
   char.dx = -0.5 end
  if btn(1, ctrl) then   
  	char.dx = 0.5 end
@@ -76,7 +104,7 @@ function move(char)
 end
 
 function atk1(p)
-	print("punching")
+	print('punching',24,24,8)
 	ctrl=p.id-1
 	--check for btn then atk1
 	if btn(5, ctrl) then
