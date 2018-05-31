@@ -83,23 +83,47 @@ function move(char)
 
  if char.x-op.x<=9
  and op.x-char.x<=0 then
-  coll=true
- else coll=false end
+  cl=true
+ else cl=false end
+ 
+ if char.x-op.x>=-9
+ and op.x-char.x>=0 then
+  cr=true
+ else cr=false end
 
- if coly and coll then
-  col=true 
- else col = false end
+ if char.x-op.x>=8 
+ or char.x-op.x<=-8 then
+  cu=false
+ else cu=true end
+
+ if coly and cl then
+  coll=true 
+ else coll = false end
+ 
+ if coly and cr then
+  colr=true 
+ else colr = false end
+ 
  ctrl=char.id-1
 	--check for btn then move
 	if btn(0, ctrl) 
- and col==false then 
+ and coll==false then 
   char.dx = -0.5 end
- if btn(1, ctrl) then   
+ if btn(1, ctrl) 
+ and colr==false then   
  	char.dx = 0.5 end
  if btn(2, ctrl) then
-  char.dy = -0.25 end
+  if cu==true then
+   if char.y>=op.y+6 
+   or op.y>=char.y+5 then
+    char.dy = -0.25 end 
+   else char.dy = -0.25 end end
  if btn(3, ctrl) then
- 	char.dy = 0.25 end
+ 	if cu==true then
+   if char.y<=op.y-6 
+   or op.y<=char.y-5 then
+    char.dy = 0.25 end 
+   else char.dy = 0.25 end end
  char.x+=char.dx
  char.y+=char.dy
 end
