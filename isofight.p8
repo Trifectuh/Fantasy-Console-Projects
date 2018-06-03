@@ -29,33 +29,49 @@ end
 
 function _draw()
 	cls()
-	tilemap()
-	drawchars()
-
- print(p[1].falling)
+	drawallinorder()
 end
 
-function drawchars()
+function drawallinorder()
 	if p[1].y>p[2].y then
-	 	spr(p[2].sprnum,p[2].x,
-	 	p[2].y,1,2,p[2].drc)
-	 	spr(p[1].sprnum,p[1].x,
-	 	p[1].y,1,2,p[1].drc) end
+		tilemap()
+	 drawchar(2)
+	 drawchar(1) end
 	if p[1].y<=p[2].y then
-	 	spr(p[1].sprnum,p[1].x,
-	 	p[1].y,1,2,p[1].drc)
-	 	spr(p[2].sprnum,p[2].x,
-	 	p[2].y,1,2,p[2].drc) end
+		tilemap()
+	 drawchar(1)
+	 drawchar(2) end
+	if fellofftop(1) then
+		drawchar(1)
+		tilemap()
+		drawchar(2) end
+	if fellofftop(2) then
+		drawchar(2)
+		tilemap()
+		drawchar(1) end
+end
+
+function drawchar(num)
+	spr(p[num].sprnum,p[num].x,
+	 	p[num].y,1,2,p[num].drc)
 end
 
 function fall(c)
  clr=6
  if pget(c.x-1,c.y+17)!=clr
  and pget(c.x+8,c.y+17)!=clr
-  then c.falling=true 
- else c.falling=false end
+  then 
+  	if c.felly==nil then
+  		c.felly=c.y end
+  	c.falling=true end
  if c.falling == true then
   c.y+=1 end
+end
+
+function fellofftop(c)
+	if p[c].falling==true
+	and p[c].felly<=48 
+		then return true end
 end
 
 function tilemap()
@@ -129,7 +145,6 @@ function move(char)
 end
 
 function atk1(p)
-	print('punching',24,24,8)
 	ctrl=p.id-1
 	--check for btn then atk1
 	if btn(5, ctrl) then
