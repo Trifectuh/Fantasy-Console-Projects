@@ -9,10 +9,11 @@ function _init()
  --init player characters
 	p={{sprnum=0,drc=false,x=36,
 		   y=50,dx=0,dy=0,hp=50,
-					stock=5,id=1},
+					stock=5,id=1,sx=36,sy=50},
 				{sprnum=32,drc=true,x=78,
 					y=50,dx=0,dy=0,hp=50,
-				 stock=5,id=2}} end
+				 stock=5,id=2,sx=78,sy=50}}
+end
 
 function _update60()
  --check for win conditions
@@ -60,12 +61,16 @@ function fall(c)
  clr=6
  if pget(c.x-1,c.y+17)!=clr
  and pget(c.x+8,c.y+17)!=clr
-  then 
-  	if c.felly==nil then
+  then if c.felly==nil then
   		c.felly=c.y end
   	c.falling=true end
- if c.falling == true then
+ if c.falling==true then
   c.y+=1 end
+ if c.falling==true
+ and c.y>128 then
+ 	c.falling=false
+ 	c.x=c.sx c.y=c.sy
+ 	c.felly=nil end
 end
 
 function fellofftop(c)
