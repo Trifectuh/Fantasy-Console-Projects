@@ -4,33 +4,109 @@ __lua__
 --isofight: don't die or fall
 
 function _init()
+ --hacky fix for characters
+ --falling through floor
+ firstrun=true
  --how many players
 	num_players=2
  --init player characters
-	p={{sprnum=0,drc=false,x=36,
-		   y=50,dx=0,dy=0,hp=50,
-					stock=5,id=1,sx=36,sy=50},
-				{sprnum=32,drc=true,x=78,
-					y=50,dx=0,dy=0,hp=50,
-				 stock=5,id=2,sx=78,sy=50}}
+ --player 1
+	p={{id=1,
+     --stuff that gets rendered
+     activespr=0,
+     width=1,
+     height=2,
+     idlespr=0,
+     drc=false,
+     x=36,
+     y=50,
+     sx=36,
+     sy=50,
+     dx=0,
+     dy=0,
+     framecounter=0,
+     activemove=nil,
+     --how you lose the game
+     status={hp=50,
+             stocks=5,
+             attacking=false,
+             hitstun=false,
+             falling=false,
+             dead=false},
+     --move.framewindow={length,sprite}
+     moves={atk1={startup={10,32},
+                  active={20,32},
+                  recovery={15,32}},
+            atk2={startup={10,32},
+                  active={20,32},
+                  recovery={15,32}},
+            atk3={startup={10,32},
+                  active={20,32},
+                  recovery={15,32}}}},
+ --player 2
+    {id=2,
+     activespr=32,
+     width=1,
+     height=2,
+     idlespr=32,
+     drc=true,
+     x=78,
+     y=50,
+     sx=78,
+     sy=50,
+     dx=0,
+     dy=0,
+     framecounter=0,
+     activemove=nil,
+     status={hp=50,
+             stocks=5,
+             attacking=false,
+             hitstun=false,
+             falling=false,
+             dead=false},
+     moves={atk1={startup={10,0},
+                  active={20,0},
+                  recovery={15,0}},
+            atk2={startup={10,0},
+                  active={20,0},
+                  recovery={15,0}},
+            atk3={startup={10,0},
+                  active={20,0},
+                  recovery={15,0}}}}
+ }
 end
 
 function _update60()
  --check for win conditions
-	if p[1].hp<=0 or p[1].stock<=0
+	if p[1].status.hp<=0 or p[1].status.stocks<=0
 		then win(p[2]) end
-	if p[2].hp<=0 or p[2].stock<=0
+	if p[2].status.hp<=0 or p[2].status.stocks<=0
 	 then win(p[1]) end
  --update characters
  for c in all(p) do
   c.dx=0 c.dy=0 
   move(c)
-  fall(c) end
+  fall(c) 
+  attacks(c) end
 end
 
 function _draw()
 	cls()
+ print(p[1].framecounter,0,16)
+ print(p[2].framecounter,120,16)
+ print('health: ',0,1,3)
+ print(p[1].status.hp,30,1,3)
+ print('stocks: ',0,8,2)
+ print(p[1].status.stocks,30,8,2)
+ print('health: ',90,1,3)
+ print(p[2].status.hp,120,1,3)
+ print('stocks: ',90,8,2)
+ print(p[2].status.stocks,120,8,2)
 	drawallinorder()
+ if firstrun then
+  respawn(p[1])
+  respawn(p[2]) 
+  firstrun=false end
 end
 
 function drawallinorder()
@@ -53,29 +129,47 @@ function drawallinorder()
 end
 
 function drawchar(num)
-	spr(p[num].sprnum,p[num].x,
-	 	p[num].y,1,2,p[num].drc)
+ if p[num].framecounter<=0 then
+	 spr(p[num].idlespr,
+      p[num].x,
+	 	   p[num].y,
+      1,
+      2,
+      p[num].drc)
+ else spr(p[num].activespr,
+      p[num].x,
+      p[num].y,
+      1,
+      2,
+      p[num].drc) end
 end
 
 function fall(c)
  clr=6
  if pget(c.x-1,c.y+17)!=clr
  and pget(c.x+8,c.y+17)!=clr
-  then if c.felly==nil then
-  		c.felly=c.y end
-  	c.falling=true end
- if c.falling==true then
-  c.y+=1 end
- if c.falling==true
+  then if c.status.felly==nil then
+  		c.status.felly=c.y end
+  	c.status.falling=true end
+ if c.status.falling==true then
+  c.y+=2 end
+ if c.status.falling==true
  and c.y>128 then
- 	c.falling=false
- 	c.x=c.sx c.y=c.sy
- 	c.felly=nil end
+  c.status.stocks-=1
+ 	respawn(c)
+  end
+end
+
+function respawn(c)
+ c.status.falling=false
+ c.x=c.sx 
+ c.y=c.sy
+ c.status.felly=nil
 end
 
 function fellofftop(c)
-	if p[c].falling==true
-	and p[c].felly<=48 
+	if p[c].status.falling==true
+	and p[c].status.felly<=48 
 		then return true end
 end
 
@@ -151,12 +245,32 @@ function move(char)
  char.y+=char.dy
 end
 
-function atk1(p)
-	ctrl=p.id-1
+function attacks(p)
+ if p.framecounter>0 then
+  p.framecounter-=1
+ else
+  activemove=0
+  atk1(p) end
+end
+
+function atk1(c)
+	ctrl=c.id-1
 	--check for btn then atk1
-	if btn(5, ctrl) then
-		p.sprnum=p.atk1spr
-	else p.sprnum=p.idlespr end
+	if btn(5, ctrl) 
+ and c.framecounter<=0 then
+  c.activemove=1
+  c.framecounter=c.moves.atk1.startup[1]+
+               c.moves.atk1.active[1]+
+               c.moves.atk1.recovery[1]
+		c.activespr=c.moves.atk1.startup[2]
+ elseif c.activemove==1 then
+  if c.framecounter>=c.moves.atk1.active[1]+
+                     c.moves.atk1.recovery[1]
+   then c.activespr=c.moves.atk1.startup[2]
+  elseif c.framecounter>=c.moves.atk1.recovery[1]
+   then c.activespr=c.moves.atk1.active[2]
+  else c.activespr=c.moves.atk1.recovery[2] end
+ end
 end
 __gfx__
 44444444444444440000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
