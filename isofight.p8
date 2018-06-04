@@ -34,7 +34,7 @@ end
 
 function drawallinorder()
 	if p[1].y>p[2].y then
-		tilemap()
+  tilemap()
 	 drawchar(2)
 	 drawchar(1) end
 	if p[1].y<=p[2].y then
@@ -75,6 +75,7 @@ function fellofftop(c)
 end
 
 function tilemap()
+ mapdone=false
 	startx=48 starty=32 rows=4
 	while rows>0 do
 		x=startx y=starty c=4
@@ -86,6 +87,7 @@ function tilemap()
 		starty=starty+8
 		rows=rows-1
 	end
+ mapdone=true
 end
 	
 function move(char)
@@ -107,8 +109,8 @@ function move(char)
   cr=true
  else cr=false end
 
- if char.x-op.x>=8 
- or char.x-op.x<=-8 then
+ if char.x-op.x>8 
+ or char.x-op.x<-8 then
   cu=false
  else cu=true end
 
