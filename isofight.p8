@@ -33,7 +33,8 @@ function _init()
      status={hp=50,
              stocks=5,
              attacking=false,
-             hitstun=false,
+             knockup=0,
+             knockback=0,
              falling=false,
              dead=false},
      --move.framewindow={length,sprite}
@@ -66,7 +67,8 @@ function _init()
      status={hp=50,
              stocks=5,
              attacking=false,
-             hitstun=false,
+             knockup=0,
+             knockback=0,
              falling=false,
              dead=false},
      moves={atk1={startup={8,40},
@@ -230,6 +232,7 @@ end
 
 function respawn(c)
  c.status.falling=false
+ c.status.knockback=0
  c.x=c.sx 
  c.y=c.sy
  c.status.felly=nil
@@ -261,10 +264,27 @@ function push(char)
 end
 
 function move(char)
-if char.halt==false then
- if char.id==1 then op=p[2] end
- if char.id==2 then op=p[1] end
+if char.id==1 then op=p[2] end
+if char.id==2 then op=p[1] end
 
+if char.status.knockback>0 then
+ if char.x<op.x then
+  char.x-=char.status.knockback
+  char.y-=char.status.knockup
+  char.status.knockback-=0.15 
+  if char.status.knockup>0 then
+   char.status.knockup-=0.075
+  elseif char.status.knockup<0 then
+   char.status.knockup+=0.075 end
+ elseif char.x>op.x then
+  char.x+=char.status.knockback
+  char.y-=char.status.knockup
+  char.status.knockback-=0.15
+  if char.status.knockup>0 then
+   char.status.knockup-=0.075
+  elseif char.status.knockup<0 then
+   char.status.knockup+=0.075 end end
+elseif char.halt==false then
  if char.y<=op.y-5
  or char.y>=op.y+5 then
   coly=false
@@ -331,6 +351,17 @@ end
 
 function atk1(c)
 	ctrl=c.id-1
+ if c.id==1 then op=p[2] end
+ if c.id==2 then op=p[1] end
+ if c.y<=op.y-5
+ or c.y>=op.y+5 then
+  coly=false
+ else coly=true end
+ if op.x-c.x<=14 and op.x-c.x>0 and coly then
+  inrange=true
+ elseif c.x-op.x<=14 and c.x-op.x>=0 and coly then
+  inrange=true
+ else inrange=false end
 	--check for btn then atk1
 	if btn(4, ctrl) then
  if c.framecounter<=0 then
@@ -348,12 +379,17 @@ function atk1(c)
                c.moves.atk1.recovery[1]
    then c.activespr=c.moves.atk1.startup[2]
   elseif c.framecounter>=c.moves.atk1.recovery[1]
-   then c.width=3
-   					c.activespr=c.moves.atk1.active[2]
+   then c.activespr=c.moves.atk1.active[2]
+    if inrange then 
+     if op.status.knockback<=0 then
+     op.status.hp-=5 end
+     op.status.knockback=2
+     if c.y>op.y then
+      op.status.knockup=1
+     elseif c.y<op.y then
+      op.status.knockup=-1 end end
   elseif c.framecounter>0
-   then c.width=2
-   					c.projectile=13
-   					c.activespr=c.moves.atk1.recovery[2]
+   then c.activespr=c.moves.atk1.recovery[2]
   else 	c.projectile=nil
   						c.activemove=0 c.halt=false end
  else c.projectile=nil
