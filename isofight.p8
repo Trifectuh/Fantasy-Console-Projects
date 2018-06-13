@@ -29,6 +29,7 @@ function _init()
      framecounter=0,
      activemove=nil,
      halt=false,
+     blocking=false,
      --how you lose the game
      status={hp=50,
              stocks=5,
@@ -64,6 +65,7 @@ function _init()
      framecounter=0,
      activemove=nil,
      halt=false,
+     blocking=false,
      status={hp=50,
              stocks=5,
              attacking=false,
@@ -350,9 +352,10 @@ function attacks(p)
 end
 
 function atk1(c)
-	ctrl=c.id-1
  if c.id==1 then op=p[2] end
  if c.id==2 then op=p[1] end
+ ctrl=c.id-1
+ opctrl=op.id-1
  if c.y<=op.y-5
  or c.y>=op.y+5 then
   coly=false
@@ -380,10 +383,12 @@ function atk1(c)
    then c.activespr=c.moves.atk1.startup[2]
   elseif c.framecounter>=c.moves.atk1.recovery[1]
    then c.activespr=c.moves.atk1.active[2]
-    if inrange then 
-     if op.status.knockback<=0 then
-     op.status.hp-=5 end
-     op.status.knockback=2
+    if inrange then
+     if op.x<c.x and btn(0,opctrl) then
+      op.halt=true
+     elseif op.status.knockback<=0 then
+     op.status.hp-=5
+     op.status.knockback=2 end
      if c.y>op.y then
       op.status.knockup=1
      elseif c.y<op.y then
