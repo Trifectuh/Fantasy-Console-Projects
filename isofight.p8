@@ -348,7 +348,8 @@ function attacks(p)
   p.framecounter-=1
  else
   activemove=0 end
- atk1(p)
+ if p.blocking==false then
+  atk1(p) end
 end
 
 function atk1(c)
@@ -378,14 +379,29 @@ function atk1(c)
  end
  if c.activemove==1 then
  	c.halt=true
+  if inrange then
+     if op.x<c.x and btn(0,opctrl) then
+      op.halt=true
+      op.blocking=true
+     elseif op.x>c.x and btn(1,opctrl) then
+      op.halt=true
+      op.blocking=true end
+  else op.blocking=false
+       op.halt=false end
   if c.framecounter>=c.moves.atk1.active[1]+
                c.moves.atk1.recovery[1]
    then c.activespr=c.moves.atk1.startup[2]
   elseif c.framecounter>=c.moves.atk1.recovery[1]
    then c.activespr=c.moves.atk1.active[2]
+    if op.x<c.x and c.x-op.x>9 then c.x-=0.5
+    elseif op.x>c.x and op.x-c.x>9 then c.x+=0.5 end
     if inrange then
      if op.x<c.x and btn(0,opctrl) then
       op.halt=true
+      op.blocking=true
+     elseif op.x>c.x and btn(1,opctrl) then
+      op.halt=true
+      op.blocking=true
      elseif op.status.knockback<=0 then
      op.status.hp-=5
      op.status.knockback=2 end
@@ -393,8 +409,10 @@ function atk1(c)
       op.status.knockup=1
      elseif c.y<op.y then
       op.status.knockup=-1 end end
-  elseif c.framecounter>0
-   then c.activespr=c.moves.atk1.recovery[2]
+  elseif c.framecounter>0 then 
+   c.activespr=c.moves.atk1.recovery[2]
+   op.halt=false
+   op.blocking=false
   else 	c.projectile=nil
   						c.activemove=0 c.halt=false end
  else c.projectile=nil
