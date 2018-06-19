@@ -5,12 +5,8 @@ __lua__
 
 function _init()
  restarttimer=nil
- --hacky fix for characters
- --falling through floor
  firstrun=true
- --how many players
 	num_players=2
- --init player characters
  --player 1
 	p={{id=1,
      --stuff that gets rendered
@@ -39,15 +35,9 @@ function _init()
              falling=false,
              dead=false},
      --move.framewindow={length,sprite}
-     moves={atk1={startup={8,8},
-                  active={10,10},
-                  recovery={12,4}},
-            atk2={startup={10,32},
-                  active={20,32},
-                  recovery={15,32}},
-            atk3={startup={10,32},
-                  active={20,32},
-                  recovery={15,32}}}},
+     moves={atk1={s={8,8},a={10,10},r={12,4}},
+            atk2={s={10,32},a={20,32},r={15,32}},
+            atk3={s={10,32},a={20,32},r={15,32}}}},
  --player 2
     {id=2,
      activespr=32,
@@ -73,66 +63,66 @@ function _init()
              knockback=0,
              falling=false,
              dead=false},
-     moves={atk1={startup={8,40},
-                  active={10,42},
-                  recovery={12,36}},
-            atk2={startup={10,0},
-                  active={20,0},
-                  recovery={15,0}},
-            atk3={startup={10,0},
-                  active={20,0},
-                  recovery={15,0}}}}
- }
+     moves={atk1={s={8,40},a={10,42},r={12,36}},
+            atk2={s={10,0},a={20,0},r={15,0}},
+            atk3={s={10,0},a={20,0},r={15,0}}}}
+ } 
 end
 
-function checkwin()
- if p[1].status.hp<=0 or p[1].status.stocks<=0
-  then return p[2]
- elseif p[2].status.hp<=0 or p[2].status.stocks<=0
-  then return p[1]
- else return nil end
+function winner()
+ if p[1].status.hp<=0 or 
+ p[1].status.stocks<=0 then 
+  return p[2]
+ elseif p[2].status.hp<=0 or 
+ p[2].status.stocks<=0 then
+  return p[1]
+ else 
+  return nil 
+ end
+end
+
+function victory(c)
+ if winner()==p[1] then
+  cls()
+  print('player 1 wins!',36,40,8)
+  print('press (a) to run it back',20,60,8)
+ elseif winner()==p[2] then
+  cls()
+  print('player 2 wins!',36,40,8)
+  print('press (a) to run it back',20,60,8) 
+ end
 end
 
 function _update60()
  --check for win conditions
-	if checkwin()==nil then
+	if winner()==nil then
  --update characters
   for c in all(p) do
    c.dx=0 c.dy=0 
    move(c)
    fall(c)
    attacks(c)
-   push(c)
-   face() end
- else restart() end
+   face() 
+  end
+ else 
+  restart() 
+ end
 end
 
 function _draw()
 	cls()
- if checkwin()==p[1] then
-  cls()
-  print('player 1 wins!',36,40,8)
-  print('press (a) to run it back',20,60,8)
- elseif checkwin()==p[2] then
-  cls()
-  print('player 2 wins!',36,40,8)
-  print('press (a) to run it back',20,60,8)
+ if winner()==p[1] then
+  victory(p[1])
+ elseif winner()==p[2] then
+  victory(p[2])
  else
-  print(p[1].framecounter,0,16)
-  print(p[2].framecounter,120,16)
-  print('health: ',0,1,3)
-  print(p[1].status.hp,30,1,3)
-  print('stocks: ',0,8,2)
-  print(p[1].status.stocks,30,8,2)
-  print('health: ',90,1,3)
-  print(p[2].status.hp,120,1,3)
-  print('stocks: ',90,8,2)
-  print(p[2].status.stocks,120,8,2)
-	 drawallinorder() end
+  drawui()
+	 drawz() end
  if firstrun then
   respawn(p[1])
   respawn(p[2]) 
-  firstrun=false end
+  firstrun=false 
+ end
 end
 
 function restart()
@@ -141,95 +131,103 @@ function restart()
  elseif restarttimer>0 then
   restarttimer-=1
  elseif btn(4,0) or btn(4,1) then
-  run() end
+  run() 
+ end
 end
 
-function drawallinorder()
+function drawui()
+ print('health: ',0,1,3)
+ print(p[1].status.hp,30,1,3)
+ print('stocks: ',0,8,2)
+ print(p[1].status.stocks,30,8,2)
+ print('health: ',90,1,3)
+ print(p[2].status.hp,120,1,3)
+ print('stocks: ',90,8,2)
+ print(p[2].status.stocks,120,8,2)
+end
+
+function drawz()
 	if p[1].y>p[2].y then
-  tilemap()
-	 drawchar(2)
-	 drawchar(1) end
+  tilemap() 
+  drawchar(2) 
+  drawchar(1) 
+ end
 	if p[1].y<=p[2].y then
-		tilemap()
-	 drawchar(1)
-	 drawchar(2) end
+		tilemap() 
+  drawchar(1) 
+  drawchar(2) 
+ end
 	if fellofftop(1) then
-		drawchar(1)
-		tilemap()
-		drawchar(2) end
+		drawchar(1) 
+  tilemap() 
+  drawchar(2) 
+ end
 	if fellofftop(2) then
-		drawchar(2)
-		tilemap()
-		drawchar(1) end
+		drawchar(2) 
+  tilemap() 
+  drawchar(1) 
+ end
 end
 
 function drawchar(num)
  if p[num].framecounter<=0
- and p[num].walk==false then
-	 p[num].activespr=
-	 	p[num].idlespr end
- spr(p[num].activespr,
-  		 p[num].x,
-     p[num].y,
-     p[num].width,
-     p[num].height,
-     p[num].drc)
- if p[num].projectile!=nil then
- spr(p[num].projectile,
- 				p[num].x+20,
- 				p[num].y,1,1,
- 				p[num].drc) end
+  and p[num].walk==false then
+	  p[num].activespr=p[num].idlespr 
+ end
+ spr(p[num].activespr, p[num].x, p[num].y,
+     p[num].width, p[num].height, p[num].drc)
 end
 
 function face()
 	if p[1].x<p[2].x then
-		p[1].drc=false
-		p[2].drc=true end
+		p[1].drc=false p[2].drc=true 
+ end
 	if p[1].x>p[2].x then
-		p[1].drc=true 
-		p[2].drc=false end
+		p[1].drc=true  p[2].drc=false 
+ end
 end
 
-function walk(c)
+function walkanim(c)
 	stride=6
 	if c.walkframe==nil then
 		c.walkframe=stride
 		c.activespr=c.walkspr[1]
-		c.walkframe-=1 end
+		c.walkframe-=1 
+ end
 	if c.walkframe>0 then
 		c.activespr=c.activespr
 		c.walkframe-=1
-	elseif c.activespr==
-		c.walkspr[1] then
+	elseif c.activespr==c.walkspr[1] then
 		c.walkframe=stride
 		c.activespr=c.walkspr[2]
-	elseif c.activespr==
-		c.walkspr[2] then
+	elseif c.activespr==c.walkspr[2] then
 		c.walkframe=stride
 		c.activespr=c.walkspr[3]
-	elseif c.activespr==
-		c.walkspr[3] then
+	elseif c.activespr==c.walkspr[3] then
 		c.walkframe=stride
 		c.activespr=c.walkspr[4]
-	else c.walkframe=stride
-						c.activespr=c.walkspr[1]
+	else 
+  c.walkframe=stride
+		c.activespr=c.walkspr[1]
 	end
 end
 
 function fall(c)
  clr=6
  if pget(c.x-2,c.y+18)!=clr
- and pget(c.x+9,c.y+18)!=clr
-  then if c.status.felly==nil then
-  		c.status.felly=c.y end
-  	c.status.falling=true end
+  and pget(c.x+9,c.y+18)!=clr then 
+   if c.status.felly==nil then
+  		c.status.felly=c.y 
+   end
+  	c.status.falling=true 
+ end
  if c.status.falling==true then
-  c.y+=2 end
- if c.status.falling==true
- and c.y>128 then
+  c.y+=2
+ end
+ if c.status.falling==true and c.y>128 then
   c.status.stocks-=1
  	respawn(c)
-  end
+ end
 end
 
 function respawn(c)
@@ -241,16 +239,21 @@ function respawn(c)
 end
 
 function fellofftop(c)
-	if p[c].status.falling==true
-	and p[c].status.felly<=48 
-		then return true end
+	if p[c].status.falling==true 
+  and p[c].status.felly<=48 then 
+   return true 
+ end
 end
 
 function tilemap()
  mapdone=false
-	startx=48 starty=32 rows=4
+	startx=48 
+ starty=32 
+ rows=4
 	while rows>0 do
-		x=startx y=starty c=4
+		x=startx 
+  y=starty 
+  c=4
 		while c>0 do
 			spr(128,x,y,32,32)
 			x=x-16 y=y+8 c=c-1
@@ -261,15 +264,97 @@ function tilemap()
 	end
  mapdone=true
 end
-	
-function push(char)
+function setids(char)
+ if char.id==1 then 
+  op=p[2] 
+ end
+ if char.id==2 then 
+  op=p[1] 
+ end
 end
 
 function move(char)
-if char.id==1 then op=p[2] end
-if char.id==2 then op=p[1] end
+ setids(char)
+ if char.status.knockback>0 then
+  applyknockback(char)
+ elseif char.halt==false then
+  checkcollision(char)
+  ctrl=char.id-1
+	 --check for btn then move
+	 char.walk=false
+	 if btn(0, ctrl) and coll==false then 
+   char.dx=-0.5 
+   char.walk=true 
+  end
+  if btn(1, ctrl) and colr==false then   
+ 	 char.dx=0.5 
+   char.walk=true 
+  end
+  if btn(2, ctrl) then
+   if cu==true then
+    if char.y>=op.y+6 or op.y>=char.y+5 then
+     char.dy=-0.25 
+     char.walk=true 
+    end 
+   else 
+    char.dy=-0.25 
+    char.walk=true 
+   end 
+  end
+  if btn(3, ctrl) then
+ 	 if cu==true then
+    if char.y<=op.y-6 or op.y<=char.y-5 then
+     char.dy = 0.25 
+     char.walk=true 
+    end 
+   else 
+    char.dy = 0.25 
+    char.walk=true 
+   end 
+  end
+  if char.walk then
+ 	 walkanim(char) 
+  end
 
-if char.status.knockback>0 then
+  char.x+=char.dx
+  char.y+=char.dy
+ end
+end
+
+function checkcollision(char)
+ if char.y<=op.y-5 or char.y>=op.y+5 then
+  coly=false
+ else 
+  coly=true 
+ end
+ if char.x-op.x<=9 and op.x-char.x<=0 then
+  cl=true
+ else 
+  cl=false 
+ end
+ if char.x-op.x>=-9 and op.x-char.x>=0 then
+  cr=true
+ else 
+  cr=false 
+ end
+ if char.x-op.x>8 or char.x-op.x<-8 then
+  cu=false
+ else 
+  cu=true 
+ end
+ if coly and cl then
+  coll=true 
+ else 
+  coll=false 
+ end
+ if coly and cr then
+  colr=true 
+ else 
+  colr = false 
+ end
+end
+
+function applyknockback(char)
  if char.x<op.x then
   char.x-=char.status.knockback
   char.y-=char.status.knockup
@@ -277,7 +362,8 @@ if char.status.knockback>0 then
   if char.status.knockup>0 then
    char.status.knockup-=0.075
   elseif char.status.knockup<0 then
-   char.status.knockup+=0.075 end
+   char.status.knockup+=0.075 
+  end
  elseif char.x>op.x then
   char.x+=char.status.knockback
   char.y-=char.status.knockup
@@ -285,117 +371,71 @@ if char.status.knockback>0 then
   if char.status.knockup>0 then
    char.status.knockup-=0.075
   elseif char.status.knockup<0 then
-   char.status.knockup+=0.075 end end
-elseif char.halt==false then
- if char.y<=op.y-5
- or char.y>=op.y+5 then
-  coly=false
- else coly=true end
-
- if char.x-op.x<=9
- and op.x-char.x<=0 then
-  cl=true
- else cl=false end
- 
- if char.x-op.x>=-9
- and op.x-char.x>=0 then
-  cr=true
- else cr=false end
-
- if char.x-op.x>8 
- or char.x-op.x<-8 then
-  cu=false
- else cu=true end
-
- if coly and cl then
-  coll=true 
- else coll = false end
- 
- if coly and cr then
-  colr=true 
- else colr = false end
- 
- ctrl=char.id-1
-	--check for btn then move
-	char.walk=false
-	if btn(0, ctrl) 
- and coll==false then 
-  char.dx = -0.5 char.walk=true end
- if btn(1, ctrl) 
- and colr==false then   
- 	char.dx = 0.5 char.walk=true end
- if btn(2, ctrl) then
-  if cu==true then
-   if char.y>=op.y+6 
-   or op.y>=char.y+5 then
-    char.dy = -0.25 char.walk=true end 
-   else char.dy = -0.25 char.walk=true end end
- if btn(3, ctrl) then
- 	if cu==true then
-   if char.y<=op.y-6 
-   or op.y<=char.y-5 then
-    char.dy = 0.25 char.walk=true end 
-   else char.dy = 0.25 char.walk=true end end
- if char.walk then
- 	walk(char) end
- char.x+=char.dx
- char.y+=char.dy
-end
+   char.status.knockup+=0.075 
+  end 
+ end
 end
 
 function attacks(p)
  if p.framecounter>0 then
   p.framecounter-=1
  else
-  activemove=0 end
+  activemove=0 
+ end
  if p.blocking==false then
-  atk1(p) end
+  atk1(p) 
+ end
+end
+
+function isinrange(c, r)
+ if op.x-c.x<=r and op.x-c.x>0 and coly then
+  return true
+ elseif c.x-op.x<=r and c.x-op.x>=0 and coly then
+  return true
+ else 
+  return false 
+ end
 end
 
 function atk1(c)
- if c.id==1 then op=p[2] end
- if c.id==2 then op=p[1] end
+ range=14
+ m=c.moves.atk1
+ setids(c)
  ctrl=c.id-1
  opctrl=op.id-1
- if c.y<=op.y-5
- or c.y>=op.y+5 then
-  coly=false
- else coly=true end
- if op.x-c.x<=14 and op.x-c.x>0 and coly then
-  inrange=true
- elseif c.x-op.x<=14 and c.x-op.x>=0 and coly then
-  inrange=true
- else inrange=false end
+ checkcollision(c)
 	--check for btn then atk1
 	if btn(4, ctrl) then
- if c.framecounter<=0 then
+  if c.framecounter<=0 then
+ 	 c.halt=true
+   c.activemove=1
+   c.framecounter=m.s[1]+m.a[1]+m.r[1]
+		 c.activespr=m.s[2]
+  end
+ elseif c.activemove==1 then
  	c.halt=true
-  c.activemove=1
-  c.framecounter=c.moves.atk1.startup[1]+
-               c.moves.atk1.active[1]+
-               c.moves.atk1.recovery[1]
-		c.activespr=c.moves.atk1.startup[2]
- end
- end
- if c.activemove==1 then
- 	c.halt=true
-  if inrange then
-     if op.x<c.x and btn(0,opctrl) then
-      op.halt=true
-      op.blocking=true
-     elseif op.x>c.x and btn(1,opctrl) then
-      op.halt=true
-      op.blocking=true end
-  else op.blocking=false
-       op.halt=false end
-  if c.framecounter>=c.moves.atk1.active[1]+
-               c.moves.atk1.recovery[1]
-   then c.activespr=c.moves.atk1.startup[2]
-  elseif c.framecounter>=c.moves.atk1.recovery[1]
-   then c.activespr=c.moves.atk1.active[2]
-    if op.x<c.x and c.x-op.x>9 then c.x-=0.5
-    elseif op.x>c.x and op.x-c.x>9 then c.x+=0.5 end
-    if inrange then
+  if isinrange(c, range) then
+    if op.x<c.x and btn(0,opctrl) then
+     op.halt=true
+     op.blocking=true
+    elseif op.x>c.x and btn(1,opctrl) then
+     op.halt=true
+     op.blocking=true 
+    end
+  else 
+   op.blocking=false
+   op.halt=false 
+  end
+  if c.framecounter>=m.a[1]+m.r[1] then 
+   c.activespr=m.s[2]
+  elseif c.framecounter>=m.r[1]
+   then c.activespr=m.a[2]
+    if op.x<c.x and c.x-op.x>9 then 
+     c.x-=0.5
+    elseif op.x>c.x and op.x-c.x>9 then 
+     c.x+=0.5 
+    end
+    if isinrange(c, range) then
      if op.x<c.x and btn(0,opctrl) then
       op.halt=true
       op.blocking=true
@@ -403,21 +443,29 @@ function atk1(c)
       op.halt=true
       op.blocking=true
      elseif op.status.knockback<=0 then
-     op.status.hp-=5
-     op.status.knockback=2 end
+      op.status.hp-=5
+      op.status.knockback=2 
+     end
      if c.y>op.y then
       op.status.knockup=1
      elseif c.y<op.y then
-      op.status.knockup=-1 end end
+      op.status.knockup=-1 
+     end 
+    end
   elseif c.framecounter>0 then 
-   c.activespr=c.moves.atk1.recovery[2]
+   c.activespr=m.r[2]
    op.halt=false
    op.blocking=false
-  else 	c.projectile=nil
-  						c.activemove=0 c.halt=false end
- else c.projectile=nil
- 					c.activemove=0
- 					c.halt=false end
+  else 	
+   c.projectile=nil
+  	c.activemove=0 
+   c.halt=false 
+  end
+ else 
+  c.projectile=nil
+ 	c.activemove=0
+ 	c.halt=false 
+ end
 end
 __gfx__
 000000022e000000000000022e000000000000022e000000000000022e00000000000022e00000000000000022e00000ccc00000000000000000000000000000
