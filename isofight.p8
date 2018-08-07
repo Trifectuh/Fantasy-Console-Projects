@@ -4,6 +4,7 @@ __lua__
 --isofight: don't die or fall
 
 function _init()
+ cameraoffset=0
  restarttimer=nil
  firstrun=true
 	num_players=2
@@ -82,9 +83,10 @@ function _init()
             atk2={s={10,46},a={20,96},r={25,36}},
             atk3={s={10,0},a={20,0},r={15,0}}}}
  } 
-
-fireballs = {}
+ fireballs = {}
 end
+
+
 
 function throwfireball(c,d)
  local op=getopid(c)
@@ -124,6 +126,7 @@ function fireballdmg()
       if f.t.x-f.x<2 and f.t.x-f.x>-10
         and f.t.y-f.y<4 and f.t.y-f.y>-6 then 
           if f.t.xdir!=f.dx then
+            cameraoffset=0.2
             f.t.status.hp-=5
             applyfireballimpact(f)
             del(fireballs, f)
@@ -132,6 +135,20 @@ function fireballdmg()
           end
       end
     end
+  end
+end
+
+function screenshake()
+  local fade = 0.15
+  local offset_x=16-rnd(32)
+  local offset_y=16-rnd(32)
+  offset_x*=cameraoffset
+  offset_y*=cameraoffset
+  
+  camera(offset_x,offset_y)
+  cameraoffset*=fade
+  if cameraoffset<0.05 then
+    camereaoffset=0
   end
 end
 
@@ -199,6 +216,7 @@ function _update60()
 end
 
 function _draw()
+ screenshake()
 	cls()
  if winner()==p[1] or winner()==p[2] then
   victory()
@@ -590,7 +608,7 @@ function atk1(c)
      op.blocking=true 
      op.activespr=op.blockspr
     end
-  else 
+  else
    op.blocking=false
    op.activespr=op.walkspr[0]
    op.halt=false 
@@ -612,8 +630,9 @@ function atk1(c)
       op.halt=true
       op.blocking=true
      elseif op.status.knockback<=0 then
+      cameraoffset=0.1
       op.status.hp-=5
-      op.status.knockback=2 
+      op.status.knockback=2
      end
      if c.y>op.y then
       op.status.knockup=1
