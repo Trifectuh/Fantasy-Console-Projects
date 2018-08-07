@@ -19,6 +19,7 @@ function _init()
      idlespr=0,
      walkspr={2,0,4,6},
      blockspr=12,
+     projectilespr=66,
      drc=false,
      x=36,
      y=50,
@@ -26,6 +27,8 @@ function _init()
      sy=50,
      dx=0,
      dy=0,
+     xdir=0,
+     ydir=0,
      framecounter=0,
      activemove=nil,
      halt=false,
@@ -41,7 +44,7 @@ function _init()
              dead=false},
      --move.framewindow={length,sprite}
      moves={atk1={s={8,8},a={10,10},r={12,4}},
-            atk2={s={10,14},a={20,64},r={15,4}},
+            atk2={s={10,14},a={20,64},r={25,4}},
             atk3={s={10,32},a={20,32},r={15,32}}}},
  --player 2
     {id=2,
@@ -51,6 +54,7 @@ function _init()
      idlespr=32,
      walkspr={34,32,36,38},
      blockspr=44,
+     projectilespr=98,
      drc=true,
      x=78,
      y=50,
@@ -58,6 +62,8 @@ function _init()
      sy=50,
      dx=0,
      dy=0,
+     xdir=0,
+     ydir=0,
      framecounter=0,
      activemove=nil,
      halt=false,
@@ -71,28 +77,55 @@ function _init()
              falling=false,
              dead=false},
      moves={atk1={s={8,40},a={10,42},r={12,36}},
-            atk2={s={10,46},a={20,96},r={15,36}},
+            atk2={s={10,46},a={20,96},r={25,36}},
             atk3={s={10,0},a={20,0},r={15,0}}}}
  } 
 
 fireballs = {}
 end
 
-function throwfireball()
+function throwfireball(c,d)
+ local op=getopid(c)
  local f = {
-  sp=66,
-  x=p[1].x,
-  y=p[1].y+2,
-  dx=2,
-  dy=0,
+  t=op,
+  sp=c.projectilespr,
+  x=c.x,
+  y=c.y,
+  dx=d,
+  dy=c.ydir/2,
  }
  add(fireballs,f)
+ c.ydir=0
 end
 
 function drawfireballs()
  for f in all(fireballs) do
-   spr(f.sp,f.x,f.y) 
+   spr(f.sp,f.x,f.y)
+   fireballdmg(f)
+   f.t.halt=false
+    f.t.blocking=false
   end
+end
+
+function fireballdmg(f)
+ if f.t.x-f.x<20 and f.t.x-f.x>-30
+  and f.t.y-f.y<4 and f.t.y-f.y>-6 
+   and f.t.xdir==f.dx then
+    f.t.halt=true
+    f.t.blocking=true 
+    f.t.activespr=f.t.blockspr
+ else 
+    f.t.halt=false
+    f.t.blocking=false
+ end
+ if f.t.x-f.x<2 and f.t.x-f.x>-10
+  and f.t.y-f.y<4 and f.t.y-f.y>-6 then
+   del(fireballs, f) 
+   if f.t.xdir!=f.dx then
+    f.t.status.hp-=10
+    f.t.status.knockback+=1.5
+   end
+ end
 end
 
 function winner()
@@ -140,6 +173,7 @@ function _update60()
  --update characters
   for c in all(p) do
    c.dx=0 c.dy=0 
+   readdir(c)
    move(c)
    fall(c)
    attacks(c)
@@ -214,33 +248,33 @@ end
 function drawz()
 	if p[1].y>p[2].y then
   tilemap() 
-  drawchar(2) 
-  drawchar(1) 
+  drawchar(p[2]) 
+  drawchar(p[1]) 
  end
 	if p[1].y<=p[2].y then
 		tilemap() 
-  drawchar(1) 
-  drawchar(2) 
+  drawchar(p[1]) 
+  drawchar(p[2]) 
  end
-	if fellofftop(1) then
-		drawchar(1) 
+	if fellofftop(p[1]) then
+		drawchar(p[1]) 
   tilemap() 
-  drawchar(2) 
+  drawchar(p[2]) 
  end
-	if fellofftop(2) then
-		drawchar(2) 
+	if fellofftop(p[2]) then
+		drawchar(p[2]) 
   tilemap() 
-  drawchar(1) 
+  drawchar(p[2]) 
  end
 end
 
-function drawchar(num)
- if p[num].framecounter<=0
-  and p[num].walk==false then
-	  p[num].activespr=p[num].idlespr 
+function drawchar(c)
+ if c.framecounter<=0
+  and c.walk==false then
+	  c.activespr=c.idlespr 
  end
- spr(p[num].activespr, p[num].x, p[num].y,
-     p[num].width, p[num].height, p[num].drc)
+ spr(c.activespr, c.x, c.y,
+     c.width, c.height, c.drc)
 end
 
 function face()
@@ -304,8 +338,8 @@ function respawn(c)
 end
 
 function fellofftop(c)
-	if p[c].status.falling==true 
-  and p[c].status.felly<=48 then 
+	if c.status.falling==true 
+  and c.status.felly<=48 then 
    return true 
  end
 end
@@ -329,33 +363,55 @@ function tilemap()
 	end
  mapdone=true
 end
-function setids(char)
+
+function getopid(char)
  if char.id==1 then 
-  op=p[2] 
+  return p[2] 
  end
  if char.id==2 then 
-  op=p[1] 
+  return p[1] 
+ end
+end
+
+function readdir(char)
+ local ctrl=char.id-1
+ --read button inputs for aiming
+ if btn(0, ctrl) then
+  char.xdir=-1
+ elseif btn(1, ctrl) then
+  char.xdir=1
+ else char.xdir=0
+ end
+ if btn(2, ctrl) then
+  char.ydir=-1
+ elseif btn(3, ctrl) then
+  char.ydir=1
+ else char.ydir=0
  end
 end
 
 function move(char)
- setids(char)
+ local ctrl=char.id-1
+ local op=getopid(char)
+ --do movement stuff
  if char.status.knockback>0 then
   applyknockback(char)
  elseif char.halt==false then
   checkcollision(char)
-  ctrl=char.id-1
 	 --check for btn then move
 	 char.walk=false
 	 if btn(0, ctrl) and coll==false then 
    char.dx=-0.5 
+   char.xdir=-1
    char.walk=true 
   end
   if btn(1, ctrl) and colr==false then   
  	 char.dx=0.5 
+   char.xdir=1
    char.walk=true 
   end
   if btn(2, ctrl) then
+   char.ydir=-1
    if cu==true then
     if char.y>=op.y+6 or op.y>=char.y+5 then
      char.dy=-0.25 
@@ -367,6 +423,7 @@ function move(char)
    end 
   end
   if btn(3, ctrl) then
+   char.ydir=1
  	 if cu==true then
     if char.y<=op.y-6 or op.y<=char.y-5 then
      char.dy = 0.25 
@@ -387,6 +444,7 @@ function move(char)
 end
 
 function checkcollision(char)
+ local op=getopid(char)
  if char.y<=op.y-5 or char.y>=op.y+5 then
   coly=false
  else 
@@ -420,6 +478,7 @@ function checkcollision(char)
 end
 
 function applyknockback(char)
+ local op=getopid(char)
  if char.x<op.x then
   char.x-=char.status.knockback
   char.y-=char.status.knockup
@@ -455,6 +514,7 @@ function attacks(p)
 end
 
 function isinrange(c, r)
+ local op=getopid(c)
  if op.x-c.x<=r and op.x-c.x>0 and coly then
   return true
  elseif c.x-op.x<=r and c.x-op.x>=0 and coly then
@@ -467,9 +527,9 @@ end
 function atk1(c)
  range=14
  m=c.moves.atk1
- setids(c)
- ctrl=c.id-1
- opctrl=op.id-1
+ local op=getopid(c)
+ local ctrl=c.id-1
+ local opctrl=op.id-1
  checkcollision(c)
 	--check for btn then atk1
 	if btn(4, ctrl) and c.framecounter<=0 
@@ -536,8 +596,8 @@ end
 
 function atk2(c)
  m=c.moves.atk2
- setids(c)
- ctrl=c.id-1
+ local op=getopid(c)
+ local ctrl=c.id-1
  opctrl=op.id-1
  --check for btn then atk1
  if btn(5, ctrl) and c.framecounter<=0 
@@ -554,13 +614,16 @@ function atk2(c)
    then 
     c.activespr=m.a[2]
     if c.status.projectile==false then
-     throwfireball()
+     if op.x<c.x then throwfireball(c,-1)
+     else throwfireball(c,1) end
      c.status.projectile=true
     end
     if op.x<c.x and c.x-op.x>9 then 
      c.x+=0.5
+     c.y-=c.ydir/4
     elseif op.x>c.x and op.x-c.x>9 then 
      c.x-=0.5 
+     c.y-=c.ydir/4
     end
   elseif c.framecounter>0 then 
    c.activespr=m.r[2]
@@ -609,9 +672,9 @@ __gfx__
 00000055f55f000000000f000055f0000000f0000055f00000000055f55f000000f0000055f00000000f00000055f00000000055f55f0000000f0000000055f0
 00000022e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000025f00000000999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000022e00000000999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000022eeeeef0000999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000022222225ef00999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000022e00000000888990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000022eeeeef0000888990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000022222225ef00888990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000222e2222500999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000222e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000555f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -624,11 +687,11 @@ __gfx__
 0000000002e02e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000055f55f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000011d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000015f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000011d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000011dddddf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000011111115df00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000000111d1111500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000015f00000000ccccc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000011d00000000111cc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000011dddddf0000111cc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000011111115df00111cc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000000111d1111500ccccc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000111d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000555f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000111d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
