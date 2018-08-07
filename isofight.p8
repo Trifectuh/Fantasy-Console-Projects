@@ -122,11 +122,13 @@ function fireballdmg()
           f.t.activespr=f.t.blockspr
         end
       if f.t.x-f.x<2 and f.t.x-f.x>-10
-        and f.t.y-f.y<4 and f.t.y-f.y>-6 then
-          del(fireballs, f) 
+        and f.t.y-f.y<4 and f.t.y-f.y>-6 then 
           if f.t.xdir!=f.dx then
-            f.t.status.hp-=10
-            f.t.status.knockback+=1.5
+            f.t.status.hp-=5
+            applyfireballimpact(f)
+            del(fireballs, f)
+          else
+            del(fireballs, f)
           end
       end
     end
@@ -333,6 +335,8 @@ function fall(c)
   	c.status.falling=true 
  end
  if c.status.falling==true then
+  c.status.knockback=0
+  c.status.knockup=0
   c.y+=2
   if c.y>128 then
    falldelay(c)
@@ -523,6 +527,17 @@ function applyknockback(char)
    char.status.knockup+=0.075 
   end 
  end
+end
+
+function applyfireballimpact(f)
+ if f.t.status.knockback<=0 then
+      f.t.status.knockback=1.5 
+     end
+     if f.y>f.t.y then
+      f.t.status.knockup=0.75
+     elseif f.y<f.t.y then
+      f.t.status.knockup=-0.75 
+     end 
 end
 
 function attacks(p)
