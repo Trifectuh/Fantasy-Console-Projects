@@ -101,31 +101,33 @@ end
 function drawfireballs()
  for f in all(fireballs) do
    spr(f.sp,f.x,f.y)
-   fireballdmg(f)
-   f.t.halt=false
-    f.t.blocking=false
   end
 end
 
-function fireballdmg(f)
- if f.t.x-f.x<20 and f.t.x-f.x>-30
-  and f.t.y-f.y<4 and f.t.y-f.y>-6 
-   and f.t.xdir==f.dx then
-    f.t.halt=true
-    f.t.blocking=true 
-    f.t.activespr=f.t.blockspr
- else 
-    f.t.halt=false
-    f.t.blocking=false
- end
- if f.t.x-f.x<2 and f.t.x-f.x>-10
-  and f.t.y-f.y<4 and f.t.y-f.y>-6 then
-   del(fireballs, f) 
-   if f.t.xdir!=f.dx then
-    f.t.status.hp-=10
-    f.t.status.knockback+=1.5
-   end
- end
+function fireballdmg()
+--hacky and bad below dont look
+  p[1].halt=false
+  p[1].blocking=false
+  p[2].halt=false
+  p[2].blocking=false
+  for f in all(fireballs) do
+    if f.t.x-f.x<20 and f.t.x-f.x>-30
+      and f.t.y-f.y<4 and f.t.y-f.y>-6 then
+        if f.t.xdir==f.dx then
+          f.t.halt=true
+          f.t.blocking=true 
+          f.t.activespr=f.t.blockspr
+        end
+      if f.t.x-f.x<2 and f.t.x-f.x>-10
+        and f.t.y-f.y<4 and f.t.y-f.y>-6 then
+          del(fireballs, f) 
+          if f.t.xdir!=f.dx then
+            f.t.status.hp-=10
+            f.t.status.knockback+=1.5
+          end
+      end
+    end
+  end
 end
 
 function winner()
@@ -178,6 +180,7 @@ function _update60()
    fall(c)
    attacks(c)
    face() 
+   fireballdmg()
   end
   for f in all(fireballs) do
    f.x+=f.dx
@@ -196,7 +199,6 @@ function _draw()
   victory()
  else
 	 drawz()
-  drawfireballs()
   drawui()
  end
  if firstrun then
@@ -249,21 +251,25 @@ function drawz()
 	if p[1].y>p[2].y then
   tilemap() 
   drawchar(p[2]) 
+  drawfireballs()
   drawchar(p[1]) 
  end
 	if p[1].y<=p[2].y then
 		tilemap() 
-  drawchar(p[1]) 
+  drawchar(p[1])
+  drawfireballs() 
   drawchar(p[2]) 
  end
 	if fellofftop(p[1]) then
 		drawchar(p[1]) 
-  tilemap() 
+  tilemap()
+  drawfireballs() 
   drawchar(p[2]) 
  end
 	if fellofftop(p[2]) then
 		drawchar(p[2]) 
-  tilemap() 
+  tilemap()
+  drawfireballs() 
   drawchar(p[2]) 
  end
 end
