@@ -12,6 +12,7 @@ function _init()
  p2roundwins=0
  --player 1
 	p={{id=1,
+     clr=14,
      --stuff that gets rendered
      activespr=0,
      width=2,
@@ -48,6 +49,7 @@ function _init()
             atk3={s={10,32},a={20,32},r={15,32}}}},
  --player 2
     {id=2,
+     clr=12,
      activespr=32,
      width=2,
      height=2,
@@ -110,6 +112,7 @@ function fireballdmg()
   p[1].blocking=false
   p[2].halt=false
   p[2].blocking=false
+ --okay read on
   for f in all(fireballs) do
     if f.t.x-f.x<20 and f.t.x-f.x>-30
       and f.t.y-f.y<4 and f.t.y-f.y>-6 then
@@ -281,6 +284,9 @@ function drawchar(c)
  end
  spr(c.activespr, c.x, c.y,
      c.width, c.height, c.drc)
+ if c.status.falling==true and c.y>128 then
+  print(c.fallcounter,c.sx+6,c.sy+6,c.clr)
+ end
 end
 
 function face()
@@ -328,10 +334,23 @@ function fall(c)
  end
  if c.status.falling==true then
   c.y+=2
+  if c.y>128 then
+   falldelay(c)
+  end
  end
- if c.status.falling==true and c.y>128 then
+ if c.status.falling==true and c.y>512 then
   c.status.stocks-=1
  	respawn(c)
+ end
+end
+
+function falldelay(c)
+ if c.y<256 then
+  c.fallcounter=3
+ elseif c.y<384 then
+  c.fallcounter=2
+ elseif c.y<512 then
+  c.fallcounter=1
  end
 end
 
