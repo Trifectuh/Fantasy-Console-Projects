@@ -2,19 +2,16 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 --isofight: don't die or fall
-
 function _init()
- cameraoffset=0
- restarttimer=nil
- firstrun=true
-	num_players=2
- countround=true
- p1roundwins=0
- p2roundwins=0
- --player 1
-	p={{id=1,
+  cameraoffset=0
+  restarttimer=nil
+  firstrun=true
+  num_players=2
+  countround=true
+  fb={}
+  p={{id=1,
      clr=14,
-     --stuff that gets rendered
+     roundwins=0,
      activespr=0,
      width=2,
      height=2,
@@ -35,7 +32,6 @@ function _init()
      activemove=nil,
      halt=false,
      blocking=false,
-     --how you lose the game
      status={hp=50,
              stocks=5,
              attacking=false,
@@ -44,13 +40,12 @@ function _init()
              knockback=0,
              falling=false,
              dead=false},
-     --move.framewindow={length,sprite}
      moves={atk1={s={8,8},a={10,10},r={12,4}},
             atk2={s={10,14},a={20,64},r={25,4}},
             atk3={s={10,32},a={20,32},r={15,32}}}},
- --player 2
     {id=2,
      clr=12,
+     roundwins=0,
      activespr=32,
      width=2,
      height=2,
@@ -81,182 +76,52 @@ function _init()
              dead=false},
      moves={atk1={s={8,40},a={10,42},r={12,36}},
             atk2={s={10,46},a={20,96},r={25,36}},
-            atk3={s={10,0},a={20,0},r={15,0}}}}
- } 
- fireballs = {}
-end
-
-
-
-function throwfireball(c,d)
- local op=getopid(c)
- local f = {
-  t=op,
-  sp=c.projectilespr,
-  x=c.x,
-  y=c.y,
-  dx=d,
-  dy=c.ydir/2,
- }
- add(fireballs,f)
- c.ydir=0
-end
-
-function drawfireballs()
- for f in all(fireballs) do
-   spr(f.sp,f.x,f.y)
-  end
-end
-
-function fireballdmg()
---hacky and bad below dont look
-  p[1].halt=false
-  p[1].blocking=false
-  p[2].halt=false
-  p[2].blocking=false
- --okay read on
-  for f in all(fireballs) do
-    if f.t.x-f.x<20 and f.t.x-f.x>-30
-      and f.t.y-f.y<4 and f.t.y-f.y>-6 then
-        if f.t.xdir==f.dx then
-          f.t.halt=true
-          f.t.blocking=true 
-          f.t.activespr=f.t.blockspr
-        end
-      if f.t.x-f.x<2 and f.t.x-f.x>-10
-        and f.t.y-f.y<4 and f.t.y-f.y>-6 then 
-          if f.t.xdir!=f.dx then
-            cameraoffset=0.2
-            f.t.status.hp-=5
-            applyfireballimpact(f)
-            del(fireballs, f)
-          else
-            del(fireballs, f)
-          end
-      end
-    end
-  end
-end
-
-function screenshake()
-  local fade = 0.15
-  local offset_x=16-rnd(32)
-  local offset_y=16-rnd(32)
-  offset_x*=cameraoffset
-  offset_y*=cameraoffset
-  
-  camera(offset_x,offset_y)
-  cameraoffset*=fade
-  if cameraoffset<0.05 then
-    camereaoffset=0
-  end
-end
-
-function winner()
- if p[1].status.hp<=0 or 
- p[1].status.stocks<=0 then 
-  return p[2]
- elseif p[2].status.hp<=0 or 
- p[2].status.stocks<=0 then
-  return p[1]
- else 
-  return nil 
- end
-end
-
-function victory()
- if winner()==p[1] and countround==true then
-  countround=false
-  p1roundwins+=1
- elseif winner()==p[2] and countround==true then
-  countround=false
-  p2roundwins+=1
- end
- if winner()==p[1] then
-  if p1roundwins<2 then
-   print('k.o! pink dad won the round!',10,40,14)
-   print('press (a) to continue',23,60,14) 
-  else
-   print('player 1 wins!',36,40,14)
-   print('press (a) to run it back',20,60,14) 
-  end
- elseif winner()==p[2] then
-  if p2roundwins<2 then
-   print('k.o! blue dad won the round!',10,40,12)
-   print('press (a) to continue',23,60,12) 
-  else
-   print('player 2 wins!',36,40,12)
-   print('press (a) to run it back',20,60,12) 
-  end
- end
+            atk3={s={10,0},a={20,0},r={15,0}}}
+    }
+  } 
 end
 
 function _update60()
  --check for win conditions
-	if winner()==nil then
+	if _roundend()==nil then
  --update characters
   for c in all(p) do
    c.dx=0 c.dy=0 
-   readdir(c)
-   attacks(c)
-   move(c)
-   fall(c)
-   face() 
-   fireballdmg()
+   char_dpad(c)
+   char_updateattacks(c)
+   char_move(c)
+   char_fall(c)
+   char_face() 
+   fb_dmg()
   end
-  for f in all(fireballs) do
+  for f in all(fb) do
    f.x+=f.dx
    f.y+=f.dy
   end
- elseif p1roundwins<2
-  and p2roundwins<2 then
-  softrestart() 
- else fullrestart()
+ elseif p[1].roundwins<2
+  and p[2].roundwins<2 then
+  _softrestart() 
+ else _fullrestart()
  end
 end
 
 function _draw()
- screenshake()
+ cam_screenshake()
 	cls()
- if winner()==p[1] or winner()==p[2] then
-  victory()
+ if _roundend()==p[1] or _roundend()==p[2] then
+  _gameend()
  else
-	 drawz()
-  drawui()
+	 _drawz()
+  _drawui()
  end
  if firstrun then
-  respawn(p[1])
-  respawn(p[2]) 
+  char_respawn(p[1])
+  char_respawn(p[2]) 
   firstrun=false 
  end
 end
 
-function softrestart()
- if restarttimer==nil then
-  restarttimer=60
- elseif restarttimer>0 then
-  restarttimer-=1
- elseif btn(4,0) or btn(4,1) then
-  p[1].status.hp=50
-  p[1].status.stocks=5
-  p[2].status.hp=50
-  p[2].status.stocks=5
-  firstrun=true
-  countround=true
- end
-end
-
-function fullrestart()
- if restarttimer==nil then
-  restarttimer=60
- elseif restarttimer>0 then
-  restarttimer-=1
- elseif btn(4,0) or btn(4,1) then
-  run()
- end
-end
-
-function drawui()
+function _drawui()
  print('health: ',0,1,14)
  print(p[1].status.hp,30,1,14)
  print('stocks: ',0,8,14)
@@ -265,133 +130,12 @@ function drawui()
  print(p[2].status.hp,120,1,12)
  print('stocks: ',90,8,12)
  print(p[2].status.stocks,120,8,12)
- print(p1roundwins,48,110,14)
+ print(p[1].roundwins,48,110,14)
  print('round',54,110,5)
- print(p2roundwins,76,110,12)
+ print(p[2].roundwins,76,110,12)
 end
 
-function drawz()
-	if p[1].y>p[2].y then
-  tilemap() 
-  drawchar(p[2]) 
-  drawfireballs()
-  drawchar(p[1]) 
- end
-	if p[1].y<=p[2].y then
-		tilemap() 
-  drawchar(p[1])
-  drawfireballs() 
-  drawchar(p[2]) 
- end
-	if fellofftop(p[1]) then
-		drawchar(p[1]) 
-  tilemap()
-  drawfireballs() 
-  drawchar(p[2]) 
- end
-	if fellofftop(p[2]) then
-		drawchar(p[2]) 
-  tilemap()
-  drawfireballs() 
-  drawchar(p[2]) 
- end
-end
-
-function drawchar(c)
- if c.framecounter<=0
-  and c.walk==false then
-	  c.activespr=c.idlespr 
- end
- spr(c.activespr, c.x, c.y,
-     c.width, c.height, c.drc)
- if c.status.falling==true and c.y>128 then
-  print(c.fallcounter,c.sx+6,c.sy+6,c.clr)
- end
-end
-
-function face()
-	if p[1].x<p[2].x then
-		p[1].drc=false p[2].drc=true 
- end
-	if p[1].x>p[2].x then
-		p[1].drc=true  p[2].drc=false 
- end
-end
-
-function walkanim(c)
-	stride=6
-	if c.walkframe==nil then
-		c.walkframe=stride
-		c.activespr=c.walkspr[1]
-		c.walkframe-=1 
- end
-	if c.walkframe>0 then
-		c.activespr=c.activespr
-		c.walkframe-=1
-	elseif c.activespr==c.walkspr[1] then
-		c.walkframe=stride
-		c.activespr=c.walkspr[2]
-	elseif c.activespr==c.walkspr[2] then
-		c.walkframe=stride
-		c.activespr=c.walkspr[3]
-	elseif c.activespr==c.walkspr[3] then
-		c.walkframe=stride
-		c.activespr=c.walkspr[4]
-	else 
-  c.walkframe=stride
-		c.activespr=c.walkspr[1]
-	end
-end
-
-function fall(c)
- clr=6
- if pget(c.x-2,c.y+18)!=clr
-  and pget(c.x+9,c.y+18)!=clr then 
-   if c.status.felly==nil then
-  		c.status.felly=c.y 
-   end
-  	c.status.falling=true 
- end
- if c.status.falling==true then
-  c.status.knockback=0
-  c.status.knockup=0
-  c.y+=2
-  if c.y>128 then
-   falldelay(c)
-  end
- end
- if c.status.falling==true and c.y>512 then
-  c.status.stocks-=1
- 	respawn(c)
- end
-end
-
-function falldelay(c)
- if c.y<256 then
-  c.fallcounter=3
- elseif c.y<384 then
-  c.fallcounter=2
- elseif c.y<512 then
-  c.fallcounter=1
- end
-end
-
-function respawn(c)
- c.status.falling=false
- c.status.knockback=0
- c.x=c.sx 
- c.y=c.sy
- c.status.felly=nil
-end
-
-function fellofftop(c)
-	if c.status.falling==true 
-  and c.status.felly<=48 then 
-   return true 
- end
-end
-
-function tilemap()
+function _drawtilemap()
  mapdone=false
 	startx=48 
  starty=32 
@@ -411,163 +155,116 @@ function tilemap()
  mapdone=true
 end
 
-function getopid(c)
- if c.id==1 then 
-  return p[2] 
+function _drawchar(c)
+ if c.framecounter<=0
+  and c.walk==false then
+	  c.activespr=c.idlespr 
  end
- if c.id==2 then 
-  return p[1] 
- end
-end
-
-function readdir(char)
- local ctrl=char.id-1
- --read button inputs for aiming
- if btn(0, ctrl) then
-  char.xdir=-1
- elseif btn(1, ctrl) then
-  char.xdir=1
- else char.xdir=0
- end
- if btn(2, ctrl) then
-  char.ydir=-1
- elseif btn(3, ctrl) then
-  char.ydir=1
- else char.ydir=0
+ spr(c.activespr, c.x, c.y,
+     c.width, c.height, c.drc)
+ if c.status.falling==true and c.y>128 then
+  print(c.fallcounter,c.sx+6,c.sy+6,c.clr)
  end
 end
 
-function walk(c,d)
- local op=getopid(c)
- local x=getcollisions(c)
- if d==0 and x.coll==false then
-  c.dx=-0.5 c.xdir=-1 c.walk=true end
- if d==1 and x.colr==false then
-  c.dx=0.5 c.xdir=1 c.walk=true end
- if d==2 then
-  c.ydir=-1
-  if x.cu==true then
-   if c.y>=op.y+6 or op.y>=c.y+5 then
-    c.dy=-0.25 c.walk=true end 
-  else c.dy=-0.25 c.walk=true end
+function _drawz()
+	if p[1].y>p[2].y then
+  _drawtilemap() 
+  _drawchar(p[2]) 
+  fb_draw()
+  _drawchar(p[1]) 
  end
- if d==3 then
-  c.ydir=1
-  if x.cu==true then
-   if c.y<=op.y-6 or op.y<=c.y-5 then
-    c.dy=0.25 c.walk=true end 
-  else c.dy=0.25 c.walk=true end
+	if p[1].y<=p[2].y then
+		_drawtilemap() 
+  _drawchar(p[1])
+  fb_draw() 
+  _drawchar(p[2]) 
  end
-end
-
-function move(c)
- local ctrl=c.id-1
- local op=getopid(c)
- if c.status.knockback>0 then
-  applyknockback(c)
- elseif c.halt==false then
-	 c.walk=false
-	 if btn(0, ctrl) then walk(c,0) end
-  if btn(1, ctrl) then walk(c,1) end
-  if btn(2, ctrl) then walk(c,2) end
-  if btn(3, ctrl) then walk(c,3) end
-  if c.walk then
- 	 walkanim(c) 
-  end
-  c.x+=c.dx
-  c.y+=c.dy
+	if char_fellofftop(p[1]) then
+		_drawchar(p[1]) 
+  _drawtilemap()
+  fb_draw() 
+  _drawchar(p[2]) 
+ end
+	if char_fellofftop(p[2]) then
+		_drawchar(p[2]) 
+  _drawtilemap()
+  fb_draw() 
+  _drawchar(p[2]) 
  end
 end
 
-function getcollisions(c)
- local op=getopid(c)
- local collisions={}
- if c.y<=op.y-5 or c.y>=op.y+5 then
-  collisions.coly=false
- else collisions.coly=true end
- if c.x-op.x<=9 and op.x-c.x<=0 then
-  collisions.cl=true
- else collisions.cl=false end
- if c.x-op.x>=-9 and op.x-c.x>=0 then
-  collisions.cr=true
- else collisions.cr=false end
- if c.x-op.x>8 or c.x-op.x<-8 then
-  collisions.cu=false
- else collisions.cu=true end
- if collisions.coly and collisions.cl then
-  collisions.coll=true 
- else collisions.coll=false end
- if collisions.coly and collisions.cr then
-  collisions.colr=true 
- else collisions.colr = false end
- return collisions
-end
-
-function applyknockback(char)
- local op=getopid(char)
- if char.x<op.x then
-  char.x-=char.status.knockback
-  char.y-=char.status.knockup
-  char.status.knockback-=0.15 
-  if char.status.knockup>0 then
-   char.status.knockup-=0.075
-  elseif char.status.knockup<0 then
-   char.status.knockup+=0.075 
-  end
- elseif char.x>op.x then
-  char.x+=char.status.knockback
-  char.y-=char.status.knockup
-  char.status.knockback-=0.15
-  if char.status.knockup>0 then
-   char.status.knockup-=0.075
-  elseif char.status.knockup<0 then
-   char.status.knockup+=0.075 
-  end 
- end
-end
-
-function applyfireballimpact(f)
- if f.t.status.knockback<=0 then
-      f.t.status.knockback=1.5 
-     end
-     if f.y>f.t.y then
-      f.t.status.knockup=0.75
-     elseif f.y<f.t.y then
-      f.t.status.knockup=-0.75 
-     end 
-end
-
-function attacks(p)
- if p.framecounter>0 then
-  p.framecounter-=1
- else
-  p.activemove=0 
-  p.status.projectile=false
- end
- if p.blocking==false then
-  atk1(p)
-  atk2(p)
- end
-end
-
-function isinrange(c, r)
- local op=getopid(c)
- if op.x-c.x<=r and op.x-c.x>0 and coly then
-  return true
- elseif c.x-op.x<=r and c.x-op.x>=0 and coly then
-  return true
+function _roundend()
+ if p[1].status.hp<=0 or 
+ p[1].status.stocks<=0 then 
+  return p[2]
+ elseif p[2].status.hp<=0 or 
+ p[2].status.stocks<=0 then
+  return p[1]
  else 
-  return false 
+  return nil 
  end
 end
 
-function atk1(c)
+function _softrestart()
+ if restarttimer==nil then
+  restarttimer=60
+ elseif restarttimer>0 then
+  restarttimer-=1
+ elseif btn(4,0) or btn(4,1) then
+  p[1].status.hp=50
+  p[1].status.stocks=5
+  p[2].status.hp=50
+  p[2].status.stocks=5
+  firstrun=true
+  countround=true
+ end
+end
+
+function _gameend()
+ if _roundend()==p[1] and countround==true then
+  countround=false
+  p[1].roundwins+=1
+ elseif _roundend()==p[2] and countround==true then
+  countround=false
+  p[2].roundwins+=1
+ end
+ if _roundend()==p[1] then
+  if p[1].roundwins<2 then
+   print('k.o! pink dad won the round!',10,40,14)
+   print('press (a) to continue',23,60,14) 
+  else
+   print('player 1 wins!',36,40,14)
+   print('press (a) to run it back',20,60,14) 
+  end
+ elseif _roundend()==p[2] then
+  if p[2].roundwins<2 then
+   print('k.o! blue dad won the round!',10,40,12)
+   print('press (a) to continue',23,60,12) 
+  else
+   print('player 2 wins!',36,40,12)
+   print('press (a) to run it back',20,60,12) 
+  end
+ end
+end
+
+function _fullrestart()
+ if restarttimer==nil then
+  restarttimer=60
+ elseif restarttimer>0 then
+  restarttimer-=1
+ elseif btn(4,0) or btn(4,1) then
+  run()
+ end
+end
+
+function attack_1(c)
  range=14
  m=c.moves.atk1
- local op=getopid(c)
+ local op=char_getop(c)
  local ctrl=c.id-1
  local opctrl=op.id-1
- local x=getcollisions(c)
+ local x=char_getcollisions(c)
 	--check for btn then atk1
 	if btn(4, ctrl) and c.framecounter<=0 
   and c.activemove==0 then
@@ -577,7 +274,7 @@ function atk1(c)
 		 c.activespr=m.s[2]
  elseif c.activemove==1 then
  	c.halt=true
-  if isinrange(c, range) then
+  if char_isinrange(c, range) then
     if op.x<c.x and btn(0,opctrl) then
      op.halt=true
      op.blocking=true
@@ -601,7 +298,7 @@ function atk1(c)
     elseif op.x>c.x and op.x-c.x>9 then 
      c.x+=0.5 
     end
-    if isinrange(c, range) then
+    if char_isinrange(c, range) then
      if op.x<c.x and btn(0,opctrl) then
       op.halt=true
       op.blocking=true
@@ -632,9 +329,9 @@ function atk1(c)
  end
 end
 
-function atk2(c)
+function attack_2(c)
  m=c.moves.atk2
- local op=getopid(c)
+ local op=char_getop(c)
  local ctrl=c.id-1
  local opctrl=op.id-1
  --check for btn then atk1
@@ -652,8 +349,8 @@ function atk2(c)
    then 
     c.activespr=m.a[2]
     if c.status.projectile==false then
-     if op.x<c.x then throwfireball(c,-1)
-     else throwfireball(c,1) end
+     if op.x<c.x then fb_throw(c,-1)
+     else fb_throw(c,1) end
      c.status.projectile=true
     end
     if op.x<c.x and c.x-op.x>9 then 
@@ -675,6 +372,297 @@ function atk2(c)
   c.halt=false
  end
 end
+
+function cam_screenshake()
+  local fade = 0.15
+  local offset_x=16-rnd(32)
+  local offset_y=16-rnd(32)
+  offset_x*=cameraoffset
+  offset_y*=cameraoffset
+  
+  camera(offset_x,offset_y)
+  cameraoffset*=fade
+  if cameraoffset<0.05 then
+    camereaoffset=0
+  end
+end
+
+function char_dpad(c)
+ local ctrl=c.id-1
+ if btn(0, ctrl) then
+  c.xdir=-1
+ elseif btn(1, ctrl) then
+  c.xdir=1
+ else c.xdir=0
+ end
+ if btn(2, ctrl) then
+  c.ydir=-1
+ elseif btn(3, ctrl) then
+  c.ydir=1
+ else c.ydir=0
+ end
+end
+
+function char_face()
+	if p[1].x<p[2].x then
+		p[1].drc=false p[2].drc=true 
+ end
+	if p[1].x>p[2].x then
+		p[1].drc=true  p[2].drc=false 
+ end
+end
+
+function char_fall(c)
+ clr=6
+ if pget(c.x-2,c.y+18)!=clr
+  and pget(c.x+9,c.y+18)!=clr then 
+   if c.status.felly==nil then
+  		c.status.felly=c.y 
+   end
+  	c.status.falling=true 
+ end
+ if c.status.falling==true then
+  c.status.knockback=0
+  c.status.knockup=0
+  c.y+=2
+  if c.y>128 then
+   time_falldelay(c)
+  end
+ end
+ if c.status.falling==true and c.y>512 then
+  c.status.stocks-=1
+ 	char_respawn(c)
+ end
+end
+
+function time_falldelay(c)
+ if c.y<256 then
+  c.fallcounter=3
+ elseif c.y<384 then
+  c.fallcounter=2
+ elseif c.y<512 then
+  c.fallcounter=1
+ end
+end
+
+function char_fellofftop(c)
+	if c.status.falling==true 
+  and c.status.felly<=48 then 
+   return true 
+ end
+end
+
+function char_getcollisions(c)
+ local op=char_getop(c)
+ local collisions={}
+ if c.y<=op.y-5 or c.y>=op.y+5 then
+  collisions.coly=false
+ else collisions.coly=true end
+ if c.x-op.x<=9 and op.x-c.x<=0 then
+  collisions.cl=true
+ else collisions.cl=false end
+ if c.x-op.x>=-9 and op.x-c.x>=0 then
+  collisions.cr=true
+ else collisions.cr=false end
+ if c.x-op.x>8 or c.x-op.x<-8 then
+  collisions.cu=false
+ else collisions.cu=true end
+ if collisions.coly and collisions.cl then
+  collisions.coll=true 
+ else collisions.coll=false end
+ if collisions.coly and collisions.cr then
+  collisions.colr=true 
+ else collisions.colr = false end
+ return collisions
+end
+
+function char_getop(c)
+ if c.id==1 then 
+  return p[2] 
+ end
+ if c.id==2 then 
+  return p[1] 
+ end
+end
+
+function char_isinrange(c, r)
+ local op=char_getop(c)
+ if op.x-c.x<=r and op.x-c.x>0 and coly then
+  return true
+ elseif c.x-op.x<=r and c.x-op.x>=0 and coly then
+  return true
+ else 
+  return false 
+ end
+end
+
+function char_knock(c)
+ local op=char_getop(c)
+ if c.x<op.x then
+  c.x-=c.status.knockback
+  c.y-=c.status.knockup
+  c.status.knockback-=0.15 
+  if c.status.knockup>0 then
+   c.status.knockup-=0.075
+  elseif c.status.knockup<0 then
+   c.status.knockup+=0.075 
+  end
+ elseif c.x>op.x then
+  c.x+=c.status.knockback
+  c.y-=c.status.knockup
+  c.status.knockback-=0.15
+  if c.status.knockup>0 then
+   c.status.knockup-=0.075
+  elseif c.status.knockup<0 then
+   c.status.knockup+=0.075 
+  end 
+ end
+end
+
+function char_move(c)
+ local ctrl=c.id-1
+ local op=char_getop(c)
+ if c.status.knockback>0 then
+  char_knock(c)
+ elseif c.halt==false then
+	 c.walk=false
+	 if btn(0, ctrl) then char_walk(c,0) end
+  if btn(1, ctrl) then char_walk(c,1) end
+  if btn(2, ctrl) then char_walk(c,2) end
+  if btn(3, ctrl) then char_walk(c,3) end
+  if c.walk then
+ 	 char_walkanim(c) 
+  end
+  c.x+=c.dx
+  c.y+=c.dy
+ end
+end
+
+function char_respawn(c)
+ c.status.falling=false
+ c.status.knockback=0
+ c.x=c.sx 
+ c.y=c.sy
+ c.status.felly=nil
+end
+
+function char_updateattacks(p)
+ if p.framecounter>0 then
+  p.framecounter-=1
+ else
+  p.activemove=0 
+  p.status.projectile=false
+ end
+ if p.blocking==false then
+  attack_1(p)
+  attack_2(p)
+ end
+end
+
+function char_walk(c,d)
+ local op=char_getop(c)
+ local x=char_getcollisions(c)
+ if d==0 and x.coll==false then
+  c.dx=-0.5 c.xdir=-1 c.walk=true end
+ if d==1 and x.colr==false then
+  c.dx=0.5 c.xdir=1 c.walk=true end
+ if d==2 then
+  c.ydir=-1
+  if x.cu==true then
+   if c.y>=op.y+6 or op.y>=c.y+5 then
+    c.dy=-0.25 c.walk=true end 
+  else c.dy=-0.25 c.walk=true end
+ end
+ if d==3 then
+  c.ydir=1
+  if x.cu==true then
+   if c.y<=op.y-6 or op.y<=c.y-5 then
+    c.dy=0.25 c.walk=true end 
+  else c.dy=0.25 c.walk=true end
+ end
+end
+
+function char_walkanim(c)
+	stride=6
+	if c.walkframe==nil then
+		c.walkframe=stride
+		c.activespr=c.walkspr[1]
+		c.walkframe-=1 
+ end
+	if c.walkframe>0 then
+		c.activespr=c.activespr
+		c.walkframe-=1
+	elseif c.activespr==c.walkspr[1] then
+		c.walkframe=stride
+		c.activespr=c.walkspr[2]
+	elseif c.activespr==c.walkspr[2] then
+		c.walkframe=stride
+		c.activespr=c.walkspr[3]
+	elseif c.activespr==c.walkspr[3] then
+		c.walkframe=stride
+		c.activespr=c.walkspr[4]
+	else 
+  c.walkframe=stride
+		c.activespr=c.walkspr[1]
+	end
+end
+
+function fb_throw(c,d)
+ local op=char_getop(c)
+ local f = {
+  t=op, sp=c.projectilespr, 
+  x=c.x, y=c.y,
+  dx=d, dy=c.ydir/2,
+ }
+ add(fb,f)
+ c.ydir=0
+end
+
+function fb_draw()
+ for f in all(fb) do
+   spr(f.sp,f.x,f.y)
+  end
+end
+
+function fb_dmg()
+  p[1].halt=false
+  p[1].blocking=false
+  p[2].halt=false
+  p[2].blocking=false
+  for f in all(fb) do
+    if f.t.x-f.x<20 and f.t.x-f.x>-30
+      and f.t.y-f.y<4 and f.t.y-f.y>-6 then
+        if f.t.xdir==f.dx then
+          f.t.halt=true
+          f.t.blocking=true 
+          f.t.activespr=f.t.blockspr
+        end
+      if f.t.x-f.x<2 and f.t.x-f.x>-10
+        and f.t.y-f.y<4 and f.t.y-f.y>-6 then 
+          if f.t.xdir!=f.dx then
+            cameraoffset=0.2
+            f.t.status.hp-=5
+            fb_impact(f)
+            del(fb, f)
+          else
+            del(fb, f)
+          end
+      end
+    end
+  end
+end
+
+function fb_impact(f)
+ if f.t.status.knockback<=0 then
+      f.t.status.knockback=1.5 
+     end
+     if f.y>f.t.y then
+      f.t.status.knockup=0.75
+     elseif f.y<f.t.y then
+      f.t.status.knockup=-0.75 
+     end 
+end
+
 __gfx__
 000000022e000000000000022e000000000000022e000000000000022e00000000000022e00000000000000022e00000000000022e00000000000022e0000000
 000000025f000000000000025f000000000000025f000000000000025f00000000000025f00000000000000025f00000000000025f00000000000025f0000000
