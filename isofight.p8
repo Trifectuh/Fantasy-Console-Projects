@@ -198,9 +198,9 @@ function _update60()
   for c in all(p) do
    c.dx=0 c.dy=0 
    readdir(c)
+   attacks(c)
    move(c)
    fall(c)
-   attacks(c)
    face() 
    fireballdmg()
   end
@@ -411,11 +411,11 @@ function tilemap()
  mapdone=true
 end
 
-function getopid(char)
- if char.id==1 then 
+function getopid(c)
+ if c.id==1 then 
   return p[2] 
  end
- if char.id==2 then 
+ if c.id==2 then 
   return p[1] 
  end
 end
@@ -437,91 +437,70 @@ function readdir(char)
  end
 end
 
-function move(char)
- local ctrl=char.id-1
- local op=getopid(char)
- --do movement stuff
- if char.status.knockback>0 then
-  applyknockback(char)
- elseif char.halt==false then
-  checkcollision(char)
-	 --check for btn then move
-	 char.walk=false
-	 if btn(0, ctrl) and coll==false then 
-   char.dx=-0.5 
-   char.xdir=-1
-   char.walk=true 
-  end
-  if btn(1, ctrl) and colr==false then   
- 	 char.dx=0.5 
-   char.xdir=1
-   char.walk=true 
-  end
-  if btn(2, ctrl) then
-   char.ydir=-1
-   if cu==true then
-    if char.y>=op.y+6 or op.y>=char.y+5 then
-     char.dy=-0.25 
-     char.walk=true 
-    end 
-   else 
-    char.dy=-0.25 
-    char.walk=true 
-   end 
-  end
-  if btn(3, ctrl) then
-   char.ydir=1
- 	 if cu==true then
-    if char.y<=op.y-6 or op.y<=char.y-5 then
-     char.dy = 0.25 
-     char.walk=true 
-    end 
-   else 
-    char.dy = 0.25 
-    char.walk=true 
-   end 
-  end
-  if char.walk then
- 	 walkanim(char) 
-  end
-
-  char.x+=char.dx
-  char.y+=char.dy
+function walk(c,d)
+ local op=getopid(c)
+ local x=getcollisions(c)
+ if d==0 and x.coll==false then
+  c.dx=-0.5 c.xdir=-1 c.walk=true end
+ if d==1 and x.colr==false then
+  c.dx=0.5 c.xdir=1 c.walk=true end
+ if d==2 then
+  c.ydir=-1
+  if x.cu==true then
+   if c.y>=op.y+6 or op.y>=c.y+5 then
+    c.dy=-0.25 c.walk=true end 
+  else c.dy=-0.25 c.walk=true end
+ end
+ if d==3 then
+  c.ydir=1
+  if x.cu==true then
+   if c.y<=op.y-6 or op.y<=c.y-5 then
+    c.dy=0.25 c.walk=true end 
+  else c.dy=0.25 c.walk=true end
  end
 end
 
-function checkcollision(char)
- local op=getopid(char)
- if char.y<=op.y-5 or char.y>=op.y+5 then
-  coly=false
- else 
-  coly=true 
+function move(c)
+ local ctrl=c.id-1
+ local op=getopid(c)
+ if c.status.knockback>0 then
+  applyknockback(c)
+ elseif c.halt==false then
+	 c.walk=false
+	 if btn(0, ctrl) then walk(c,0) end
+  if btn(1, ctrl) then walk(c,1) end
+  if btn(2, ctrl) then walk(c,2) end
+  if btn(3, ctrl) then walk(c,3) end
+  if c.walk then
+ 	 walkanim(c) 
+  end
+  c.x+=c.dx
+  c.y+=c.dy
  end
- if char.x-op.x<=9 and op.x-char.x<=0 then
-  cl=true
- else 
-  cl=false 
- end
- if char.x-op.x>=-9 and op.x-char.x>=0 then
-  cr=true
- else 
-  cr=false 
- end
- if char.x-op.x>8 or char.x-op.x<-8 then
-  cu=false
- else 
-  cu=true 
- end
- if coly and cl then
-  coll=true 
- else 
-  coll=false 
- end
- if coly and cr then
-  colr=true 
- else 
-  colr = false 
- end
+end
+
+function getcollisions(c)
+ local op=getopid(c)
+ local collisions={}
+ if c.y<=op.y-5 or c.y>=op.y+5 then
+  collisions.coly=false
+ else collisions.coly=true end
+ if c.x-op.x<=9 and op.x-c.x<=0 then
+  collisions.cl=true
+ else collisions.cl=false end
+ if c.x-op.x>=-9 and op.x-c.x>=0 then
+  collisions.cr=true
+ else collisions.cr=false end
+ if c.x-op.x>8 or c.x-op.x<-8 then
+  collisions.cu=false
+ else collisions.cu=true end
+ if collisions.coly and collisions.cl then
+  collisions.coll=true 
+ else collisions.coll=false end
+ if collisions.coly and collisions.cr then
+  collisions.colr=true 
+ else collisions.colr = false end
+ return collisions
 end
 
 function applyknockback(char)
@@ -588,7 +567,7 @@ function atk1(c)
  local op=getopid(c)
  local ctrl=c.id-1
  local opctrl=op.id-1
- checkcollision(c)
+ local x=getcollisions(c)
 	--check for btn then atk1
 	if btn(4, ctrl) and c.framecounter<=0 
   and c.activemove==0 then
@@ -657,7 +636,7 @@ function atk2(c)
  m=c.moves.atk2
  local op=getopid(c)
  local ctrl=c.id-1
- opctrl=op.id-1
+ local opctrl=op.id-1
  --check for btn then atk1
  if btn(5, ctrl) and c.framecounter<=0 
   and c.activemove==0 then
