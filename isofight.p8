@@ -29,18 +29,19 @@ function _init()
      xdir=0,
      ydir=0,
      framecounter=0,
-     activemove=nil,
+     activemove=0,
      halt=false,
-     blocking=false,
      status={hp=50,
              stocks=5,
              attacking=false,
+             blocking=false,
              projectile=false,
              knockup=0,
              knockback=0,
              falling=false,
              dead=false},
-     moves={atk1={s={8,8},a={10,10},r={12,4}},
+     moves={atk1={s={8,8},a={10,10},r={12,4},
+            ra=14,i=2,d=5},
             atk2={s={10,14},a={20,64},r={25,4}},
             atk3={s={10,32},a={20,32},r={15,32}}}},
     {id=2,
@@ -63,18 +64,19 @@ function _init()
      xdir=0,
      ydir=0,
      framecounter=0,
-     activemove=nil,
+     activemove=0,
      halt=false,
-     blocking=false,
      status={hp=50,
              stocks=5,
              attacking=false,
+             blocking=false,
              projectile=false,
              knockup=0,
              knockback=0,
              falling=false,
              dead=false},
-     moves={atk1={s={8,40},a={10,42},r={12,36}},
+     moves={atk1={s={8,40},a={10,42},r={12,36},
+                  ra=14,i=2,d=5},
             atk2={s={10,46},a={20,96},r={25,36}},
             atk3={s={10,0},a={20,0},r={15,0}}}
     }
@@ -87,12 +89,12 @@ function _update60()
  --update characters
   for c in all(p) do
    c.dx=0 c.dy=0 
+   fb_hitcalc()
    char_dpad(c)
-   char_updateattacks(c)
    char_move(c)
    char_fall(c)
-   char_face() 
-   fb_dmg()
+   char_face()
+   char_updateattacks(c)
   end
   for f in all(fb) do
    f.x+=f.dx
@@ -259,78 +261,61 @@ function _fullrestart()
 end
 
 function attack_1(c)
- range=14
- m=c.moves.atk1
+ local m=c.moves.atk1
  local op=char_getop(c)
  local ctrl=c.id-1
- local opctrl=op.id-1
- local x=char_getcollisions(c)
-	--check for btn then atk1
-	if btn(4, ctrl) and c.framecounter<=0 
-  and c.activemove==0 then
- 	 c.halt=true
+ if btn(4, ctrl) and c.activemove==0 then
+   c.halt=true
+   attack_anim(c,m)
    c.activemove=1
-   c.framecounter=m.s[1]+m.a[1]+m.r[1]
-		 c.activespr=m.s[2]
  elseif c.activemove==1 then
- 	c.halt=true
-  if char_isinrange(c, range) then
-    if op.x<c.x and btn(0,opctrl) then
-     op.halt=true
-     op.blocking=true
-     op.activespr=op.blockspr
-    elseif op.x>c.x and btn(1,opctrl) then
-     op.halt=true
-     op.blocking=true 
-     op.activespr=op.blockspr
-    end
-  else
-   op.blocking=false
-   op.activespr=op.walkspr[0]
-   op.halt=false 
-  end
-  if c.framecounter>=m.a[1]+m.r[1] then 
-   c.activespr=m.s[2]
-  elseif c.framecounter>=m.r[1]
-   then c.activespr=m.a[2]
-    if op.x<c.x and c.x-op.x>9 then 
-     c.x-=0.5
-    elseif op.x>c.x and op.x-c.x>9 then 
-     c.x+=0.5 
-    end
-    if char_isinrange(c, range) then
-     if op.x<c.x and btn(0,opctrl) then
-      op.halt=true
-      op.blocking=true
-     elseif op.x>c.x and btn(1,opctrl) then
-      op.halt=true
-      op.blocking=true
-     elseif op.status.knockback<=0 then
-      cameraoffset=0.1
-      op.status.hp-=5
-      op.status.knockback=2
-     end
-     if c.y>op.y then
-      op.status.knockup=1
-     elseif c.y<op.y then
-      op.status.knockup=-1 
-     end 
-    end
-  elseif c.framecounter>0 then 
-   c.activespr=m.r[2]
-   op.halt=false
-   op.blocking=false
-  else 	
-  	c.activemove=0 
-   c.halt=false 
-  end
- else
- 	c.halt=false 
+  c.halt=true
+  char_blockcheck(c,m.ra)
+  if attack_anim(c,m)=='a' then
+   char_fwdstep(c,0.5)
+   char_blockcheck(c,m.ra)
+   if char_isinrange(c,m.ra) then
+    attack_impact(op,m) end
+  elseif attack_anim(c,m)=='r' then
+   char_blockreset(op) end
+ else  
+  c.activemove=0 
+  c.halt=false 
+ end
+end
+
+function attack_anim(c,m)
+ if c.framecounter<=0 and c.activemove==0 then
+  c.framecounter=m.s[1]+m.a[1]+m.r[1]
+  c.activespr=m.s[2]
+  return 's'
+ elseif c.framecounter>=m.a[1]+m.r[1] then
+  c.activespr=m.s[2]
+  return 's'
+ elseif c.framecounter>=m.r[1] then
+  c.activespr=m.a[2]
+  return 'a'
+ elseif c.framecounter>=0 then
+  c.activespr=m.r[2] 
+  return 'r' end
+end
+
+function attack_impact(c,m)
+ local op=char_getop(c)
+ if c.status.blocking==false then
+  if c.status.knockback<=0 then
+   cameraoffset=0.2
+   c.status.hp-=m.d
+   c.status.knockback=m.i end
+  if op.y-2>c.y then
+   c.status.knockup=m.i/2
+  elseif op.y+2<c.y then
+   c.status.knockup=-(m.i/2) end
  end
 end
 
 function attack_2(c)
- m=c.moves.atk2
+ local m=c.moves.atk2
  local op=char_getop(c)
  local ctrl=c.id-1
  local opctrl=op.id-1
@@ -363,7 +348,7 @@ function attack_2(c)
   elseif c.framecounter>0 then 
    c.activespr=m.r[2]
    op.halt=false
-   op.blocking=false
+   op.status.blocking=false
   else  
    c.activemove=0 
    c.halt=false
@@ -385,6 +370,29 @@ function cam_screenshake()
   if cameraoffset<0.05 then
     camereaoffset=0
   end
+end
+
+function char_block(c)
+ c.halt=true
+ c.status.blocking=true
+ c.activespr=c.blockspr
+end
+
+function char_blockcheck(c,r)
+ local op=char_getop(c)
+ if char_isinrange(c,r) then
+  if op.x<c.x and op.xdir==-1 then
+   char_block(op)
+  elseif op.x>c.x and op.xdir==1 then
+   char_block(op)
+  end
+ end
+end
+
+function char_blockreset(c)
+ c.status.blocking=false
+ c.activespr=c.walkspr[0]
+ c.halt=false
 end
 
 function char_dpad(c)
@@ -485,11 +493,12 @@ function char_getop(c)
  end
 end
 
-function char_isinrange(c, r)
+function char_isinrange(c,r)
  local op=char_getop(c)
- if op.x-c.x<=r and op.x-c.x>0 and coly then
+ local x=char_getcollisions(c)
+ if op.x-c.x<=r and op.x-c.x>0 and x.coly then
   return true
- elseif c.x-op.x<=r and c.x-op.x>=0 and coly then
+ elseif c.x-op.x<=r and c.x-op.x>=0 and x.coly then
   return true
  else 
   return false 
@@ -530,11 +539,11 @@ function char_move(c)
   if btn(1, ctrl) then char_walk(c,1) end
   if btn(2, ctrl) then char_walk(c,2) end
   if btn(3, ctrl) then char_walk(c,3) end
-  if c.walk then
- 	 char_walkanim(c) 
+  if c.walk then 
+   char_walkanim(c)
+   c.x+=c.dx
+   c.y+=c.dy
   end
-  c.x+=c.dx
-  c.y+=c.dy
  end
 end
 
@@ -546,16 +555,25 @@ function char_respawn(c)
  c.status.felly=nil
 end
 
-function char_updateattacks(p)
- if p.framecounter>0 then
-  p.framecounter-=1
- else
-  p.activemove=0 
-  p.status.projectile=false
+function char_fwdstep(c,d)
+ local op=char_getop(c)
+ if op.x<c.x and c.x-op.x>9 then 
+  c.x-=d
+ elseif op.x>c.x and op.x-c.x>9 then 
+  c.x+=d 
  end
- if p.blocking==false then
-  attack_1(p)
-  attack_2(p)
+end
+
+function char_updateattacks(c)
+ if c.framecounter>0 then
+  c.framecounter-=1
+ else
+  c.activemove=0 
+  c.status.projectile=false
+ end
+ if c.status.blocking==false then
+  attack_1(c)
+  attack_2(c)
  end
 end
 
@@ -624,24 +642,18 @@ function fb_draw()
   end
 end
 
-function fb_dmg()
-  p[1].halt=false
-  p[1].blocking=false
-  p[2].halt=false
-  p[2].blocking=false
+function fb_hitcalc()
   for f in all(fb) do
     if f.t.x-f.x<20 and f.t.x-f.x>-30
       and f.t.y-f.y<4 and f.t.y-f.y>-6 then
         if f.t.xdir==f.dx then
           f.t.halt=true
-          f.t.blocking=true 
+          f.t.status.blocking=true 
           f.t.activespr=f.t.blockspr
         end
       if f.t.x-f.x<2 and f.t.x-f.x>-10
         and f.t.y-f.y<4 and f.t.y-f.y>-6 then 
           if f.t.xdir!=f.dx then
-            cameraoffset=0.2
-            f.t.status.hp-=5
             fb_impact(f)
             del(fb, f)
           else
@@ -653,6 +665,8 @@ function fb_dmg()
 end
 
 function fb_impact(f)
+ cameraoffset=0.2
+ f.t.status.hp-=5
  if f.t.status.knockback<=0 then
       f.t.status.knockback=1.5 
      end
