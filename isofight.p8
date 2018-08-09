@@ -3,6 +3,8 @@ version 16
 __lua__
 --isofight: don't die or fall
 function _init()
+  drawtitle=true
+  titleoffset=-32
   cameraoffset=0
   restarttimer=nil
   firstrun=true
@@ -84,43 +86,72 @@ function _init()
 end
 
 function _update60()
- --check for win conditions
-	if _roundend()==nil then
- --update characters
-  for c in all(p) do
-   c.dx=0 c.dy=0 
-   fb_hitcalc()
-   char_dpad(c)
-   char_move(c)
-   char_fall(c)
-   char_face()
-   char_updateattacks(c)
-  end
-  for f in all(fb) do
-   f.x+=f.dx
-   f.y+=f.dy
-  end
- elseif p[1].roundwins<2
-  and p[2].roundwins<2 then
-  _softrestart() 
- else _fullrestart()
+ if drawtitle==false then
+ 	if _roundend()==nil then
+  --update characters
+   for c in all(p) do
+    c.dx=0 c.dy=0 
+    fb_hitcalc()
+    char_dpad(c)
+    char_move(c)
+    char_fall(c)
+    char_face()
+    char_updateattacks(c)
+   end
+   for f in all(fb) do
+    f.x+=f.dx
+    f.y+=f.dy
+   end
+  elseif p[1].roundwins<2
+   and p[2].roundwins<2 then
+   _softrestart() 
+  else _fullrestart() end
  end
 end
 
 function _draw()
- cam_screenshake()
-	cls()
- if _roundend()==p[1] or _roundend()==p[2] then
-  _gameend()
+ if drawtitle==true then
+  cls()
+  _drawtitle(titleoffset)
+  initoffset=titleoffset
+  titleoffset+=1
+  if titleoffset>10 then 
+  titleoffset=-32 end
  else
-	 _drawz()
-  _drawui()
+  cam_screenshake()
+ 	cls()
+  if _roundend()==p[1] or _roundend()==p[2] then
+   _gameend()
+  else
+ 	 _drawz()
+   _drawui()
+  end
+  if firstrun then
+   char_respawn(p[1])
+   char_respawn(p[2]) 
+   firstrun=false 
+  end
  end
- if firstrun then
-  char_respawn(p[1])
-  char_respawn(p[2]) 
-  firstrun=false 
+end
+
+function _drawtitle(q)
+ startx=q
+ starty=-128 
+ rows=16
+ while rows>0 do
+  x=startx 
+  y=starty 
+  c=16
+  while c>0 do
+   print('punch dads',x,y,14)
+   print('punch dads',x+16,y+8,12)
+   x=x-27 y=y+8 c=c-1
+  end
+  startx=startx+32
+  starty=starty+16
+  rows=rows-1
  end
+
 end
 
 function _drawui()
