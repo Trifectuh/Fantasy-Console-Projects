@@ -3,7 +3,7 @@ version 16
 __lua__
 --isofight: don't die or fall
 function _init()
-  drawtitle=true
+  drawtitle=false
   titleoffset=-32
   cameraoffset=0
   restarttimer=nil
