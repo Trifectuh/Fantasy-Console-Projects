@@ -30,6 +30,8 @@ function _init()
      dy=0,
      xdir=0,
      ydir=0,
+     lwalldist=50,
+     rwalldist=50,
      framecounter=0,
      activemove=0,
      halt=false,
@@ -65,6 +67,8 @@ function _init()
      dy=0,
      xdir=0,
      ydir=0,
+     lwalldist=50,
+     rwalldist=50,
      framecounter=0,
      activemove=0,
      halt=false,
@@ -90,11 +94,12 @@ function _update60()
  	if _roundend()==nil then
   --update characters
    for c in all(p) do
-    c.dx=0 c.dy=0 
+    c.dx=0 c.dy=0
+    char_updatewalldist(c)
+    char_fall(c)
     fb_hitcalc()
     char_dpad(c)
     char_move(c)
-    char_fall(c)
     char_face()
     char_updateattacks(c)
     char_halt(c)
@@ -199,6 +204,10 @@ function _drawchar(c)
  if c.status.falling==true and c.y>128 then
   print(c.fallcounter,c.sx+6,c.sy+6,c.clr)
  end
+ print('l: ',0,16,14)
+ print(p[1].lwalldist,8,16,14)
+ print('r: ',0,24,14)
+ print(p[1].rwalldist,8,24,14)
  --print('a: ',0,16,14)
  --print(p[1].status.attacking,8,16,14)
  --print('b: ',0,24,14)
@@ -444,8 +453,7 @@ end
 
 function char_fall(c)
  clr=6
- if pget(c.x-2,c.y+18)!=clr
-  and pget(c.x+9,c.y+18)!=clr then 
+ if c.lwalldist<=0 or c.rwalldist<=0 then 
    if c.status.felly==nil then
   		c.status.felly=c.y 
    end
@@ -624,24 +632,36 @@ function char_walk(c,d)
  local op=char_getop(c)
  local x=char_getcollisions(c)
  if c.halt==false then
-  if d==0 and x.coll==false then
+  if d==0 and x.coll==false and c.lwalldist>=3 then
    c.dx=-0.5 c.xdir=-1 c.walk=true end
-  if d==1 and x.colr==false then
+  if d==1 and x.colr==false and c.rwalldist>=3 then
    c.dx=0.5 c.xdir=1 c.walk=true end
-  if d==2 then
+  if (d==2 and c.lwalldist>=3 and c.rwalldist>=3)
+  or (d==2 and c.y>50) then
    c.ydir=-1
    if x.cu==true then
     if c.y>=op.y+6 or op.y>=c.y+5 then
      c.dy=-0.25 c.walk=true end 
    else c.dy=-0.25 c.walk=true end
   end
-  if d==3 then
+  if (d==3 and c.lwalldist>=4 and c.rwalldist>=4)
+  or (d==3 and c.y<48) then
    c.ydir=1
    if x.cu==true then
     if c.y<=op.y-6 or op.y<=c.y-5 then
      c.dy=0.25 c.walk=true end 
    else c.dy=0.25 c.walk=true end
   end
+ end
+end
+
+function char_updatewalldist(c)
+ if c.y>=50 then
+  c.lwalldist=(c.x+8)-((c.y-51)*2)
+  c.rwalldist=(120-c.x)-((c.y-51)*2)
+ elseif c.y<=49 then
+  c.lwalldist=(c.x+8)-((47-c.y)*2)
+  c.rwalldist=(120-c.x)-((47-c.y)*2)
  end
 end
 
