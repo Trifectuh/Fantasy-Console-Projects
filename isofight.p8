@@ -34,7 +34,7 @@ function _init()
      activemove=0,
      halt=false,
      status={hp=50,
-             stocks=5,
+             stocks=2,
              attacking=false,
              blocking=false,
              projectile=false,
@@ -69,7 +69,7 @@ function _init()
      activemove=0,
      halt=false,
      status={hp=50,
-             stocks=5,
+             stocks=2,
              attacking=false,
              blocking=false,
              projectile=false,
@@ -97,6 +97,7 @@ function _update60()
     char_fall(c)
     char_face()
     char_updateattacks(c)
+    char_halt(c)
    end
    for f in all(fb) do
     f.x+=f.dx
@@ -198,6 +199,14 @@ function _drawchar(c)
  if c.status.falling==true and c.y>128 then
   print(c.fallcounter,c.sx+6,c.sy+6,c.clr)
  end
+ --print('a: ',0,16,14)
+ --print(p[1].status.attacking,8,16,14)
+ --print('b: ',0,24,14)
+ --print(p[1].status.blocking,8,24,14)
+ --print('f: ',0,32,14)
+ --print(p[1].status.falling,8,32,14)
+ --print('d: ',0,40,14)
+ --print(p[1].status.dead,8,40,14)
 end
 
 function _drawz()
@@ -246,9 +255,9 @@ function _softrestart()
   restarttimer-=1
  elseif btn(4,0) or btn(4,1) then
   p[1].status.hp=50
-  p[1].status.stocks=5
+  p[1].status.stocks=2
   p[2].status.hp=50
-  p[2].status.stocks=5
+  p[2].status.stocks=2
   firstrun=true
   countround=true
  end
@@ -296,11 +305,11 @@ function attack_1(c)
  local op=char_getop(c)
  local ctrl=c.id-1
  if btn(4, ctrl) and c.activemove==0 then
-   c.halt=true
+   c.status.attacking=true
    attack_anim(c,m)
    c.activemove=1
  elseif c.activemove==1 then
-  c.halt=true
+  c.status.attacking=true
   char_blockcheck(c,m.ra)
   if attack_anim(c,m)=='a' then
    char_fwdstep(c,0.5)
@@ -309,8 +318,11 @@ function attack_1(c)
     attack_impact(op,m) end
   elseif attack_anim(c,m)=='r' then
    char_blockreset(op) end
- elseif c.activemove!=0 then c.halt=true
- else c.halt=false end
+ elseif c.activemove!=0 then c.status.attacking=true
+ else 
+  c.status.attacking=false
+  c.activemove=0
+  char_blockreset(op) end
 end
 
 function attack_2(c)
@@ -319,21 +331,25 @@ function attack_2(c)
  local ctrl=c.id-1
  local opctrl=op.id-1
  if btn(5, ctrl) and c.activemove==0 then
-   c.halt=true
+   c.status.attacking=true
    attack_anim(c,m)
    c.activemove=2
  elseif c.activemove==2 then
-  c.halt=true
+  c.status.attacking=true
   if attack_anim(c,m)=='a' then
-    if c.status.projectile==false then
-     if op.x<c.x then fb_throw(c,-1)
-     else fb_throw(c,1) end
-     c.status.projectile=true
-    end
-    char_backstep(c,0.5)
-  end
- elseif c.activemove!=0 then c.halt=true
- else c.halt=false end
+   if c.status.projectile==false then
+    if op.x<c.x then fb_throw(c,-1)
+    else fb_throw(c,1) end
+    c.status.projectile=true
+   end
+   char_backstep(c,0.5)
+ elseif attack_anim(c,m)=='r' then
+   char_blockreset(op) end
+ elseif c.activemove!=0 then c.status.attacking=true
+ else 
+  c.status.attacking=false
+  c.activemove=0
+  char_blockreset(op) end
 end
 
 function attack_anim(c,m)
@@ -381,9 +397,9 @@ function cam_screenshake()
 end
 
 function char_block(c)
- c.halt=true
- c.status.blocking=true
- c.activespr=c.blockspr
+  c.status.blocking=true
+  c.status.activemove=0
+  c.activespr=c.blockspr
 end
 
 function char_blockcheck(c,r)
@@ -399,8 +415,6 @@ end
 
 function char_blockreset(c)
  c.status.blocking=false
- c.activespr=c.walkspr[0]
- c.halt=false
 end
 
 function char_dpad(c)
@@ -555,6 +569,18 @@ function char_move(c)
  end
 end
 
+function char_halt(c)
+ if c.status.attacking 
+ or c.status.blocking 
+ or c.status.falling 
+ or c.status.dead then
+  c.halt=true
+ elseif c.status.knockback>0
+ or c.status.knockup>0 then
+  c.halt=true
+ else c.halt=false end
+end
+
 function char_respawn(c)
  c.status.falling=false
  c.status.knockback=0
@@ -590,10 +616,8 @@ function char_updateattacks(c)
   c.activemove=0 
   c.status.projectile=false
  end
- if c.status.blocking==false then
-  attack_1(c)
-  attack_2(c)
- end
+ attack_1(c)
+ attack_2(c)
 end
 
 function char_walk(c,d)
@@ -668,7 +692,6 @@ function fb_hitcalc()
     if f.t.x-f.x<20 and f.t.x-f.x>-30
       and f.t.y-f.y<4 and f.t.y-f.y>-6 then
         if f.t.xdir==f.dx then
-          f.t.halt=true
           f.t.status.blocking=true 
           f.t.activespr=f.t.blockspr
         end
