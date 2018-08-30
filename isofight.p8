@@ -32,6 +32,8 @@ function _init()
      ydir=0,
      lwalldist=50,
      rwalldist=50,
+     btnbuffer={},
+     lastbtn={nil,nil},
      framecounter=0,
      activemove=0,
      halt=false,
@@ -69,6 +71,8 @@ function _init()
      ydir=0,
      lwalldist=50,
      rwalldist=50,
+     btnbuffer={},
+     lastbtn={nil,nil},
      framecounter=0,
      activemove=0,
      halt=false,
@@ -95,6 +99,8 @@ function _update60()
   --update characters
    for c in all(p) do
     c.dx=0 c.dy=0
+    keys:update()
+    _updatebuffer(c)
     char_updatewalldist(c)
     char_fall(c)
     fb_hitcalc()
@@ -113,6 +119,67 @@ function _update60()
    _softrestart() 
   else _fullrestart() end
  end
+end
+
+keys={btns={},ct={}}
+
+function keys:update()
+ for i=0,13 do
+  if band(btn(),shl(1,i))==shl(1,i) then
+   if keys:held(i) then
+    keys.btns[i]=2
+    keys.ct[i]=(keys.ct[i]+1) % 30
+   else
+    keys.btns[i]=3
+   end
+  else
+   if keys:held(i) then 
+    keys.btns[i]=4
+   else
+    keys.btns[i]=0
+    keys.ct[i]=0
+   end
+  end
+ end
+end
+
+function keys:held(b) 
+ return band(keys.btns[b],2) == 2 
+end
+
+function keys:down(b) 
+ return band(keys.btns[b],1) == 1 
+end
+
+function keys:up(b) 
+ return band(keys.btns[b],4) == 4 
+end
+
+function keys:pulse(b,r) 
+ return (keys:held(b) and keys.ct[b]%r==0) 
+end
+
+function _updatebuffer(c)
+ local l local r local u local d
+ if c==p[1] then
+  l=0 r=1 u=2 d=3
+ else
+  l=8 r=9 u=10 d=11 end
+ if c.lastbtn[2]!=nil then
+  c.lastbtn[2]+=1 
+  if c.lastbtn[2]>16 then
+   c.lastbtn[2]=nil end
+ end
+  if c.btnbuffer[16]!=nil then
+   del(c.btnbuffer,c.btnbuffer[1]) end
+  if keys:down(l) then 
+   add(c.btnbuffer,'<') c.lastbtn={'<',0} end
+  if keys:down(r) then 
+   add(c.btnbuffer,'>') c.lastbtn={'>',0} end
+  if keys:down(u) then 
+   add(c.btnbuffer,'^') c.lastbtn={'^',0} end
+  if keys:down(d) then 
+   add(c.btnbuffer,'v') c.lastbtn={'v',0} end
 end
 
 function _draw()
@@ -204,10 +271,20 @@ function _drawchar(c)
  if c.status.falling==true and c.y>128 then
   print(c.fallcounter,c.sx+6,c.sy+6,c.clr)
  end
- print('l: ',0,16,14)
- print(p[1].lwalldist,8,16,14)
- print('r: ',0,24,14)
- print(p[1].rwalldist,8,24,14)
+ local i=8
+ print('b: ',0,16,14)
+ for b in all(c.btnbuffer) do
+  print(b,i,16,14)
+  i+=6
+  if i>=6*16 then i=8 end
+ end
+ print('f: ',0,24,14)
+ if c.lastbtn[2]!=nil then
+  print(c.lastbtn[2],8,24,14) end
+ --print('l: ',0,16,14)
+ --print(p[1].lwalldist,8,16,14)
+ --print('r: ',0,24,14)
+ --print(p[1].rwalldist,8,24,14)
  --print('a: ',0,16,14)
  --print(p[1].status.attacking,8,16,14)
  --print('b: ',0,24,14)
