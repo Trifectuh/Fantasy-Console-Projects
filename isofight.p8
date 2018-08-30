@@ -100,12 +100,13 @@ function _update60()
    for c in all(p) do
     c.dx=0 c.dy=0
     keys:update()
-    _updatebuffer(c)
     char_updatewalldist(c)
     char_fall(c)
     fb_hitcalc()
     char_dpad(c)
     char_move(c)
+    char_dash(c)
+    _updatebuffer(c)
     char_face()
     char_updateattacks(c)
     char_halt(c)
@@ -278,9 +279,8 @@ function _drawchar(c)
   i+=6
   if i>=6*16 then i=8 end
  end
- print('f: ',0,24,14)
- if c.lastbtn[2]!=nil then
-  print(c.lastbtn[2],8,24,14) end
+ --if c.lastbtn[2]!=nil then
+  --print(btn(),8,24,14) end
  --print('l: ',0,16,14)
  --print(p[1].lwalldist,8,16,14)
  --print('r: ',0,24,14)
@@ -516,6 +516,38 @@ function char_dpad(c)
  elseif btn(3, ctrl) then
   c.ydir=1
  else c.ydir=0
+ end
+end
+
+function char_dash(c)
+ local l local r local u local d
+ if c==p[1] then
+  l=0 r=1 u=2 d=3
+ else
+  l=8 r=9 u=10 d=11 end
+ if c.lastbtn[1]=='<' 
+ and c.lastbtn[2]!=nil then
+  if keys:down(l) then
+   c.dx-=5
+   c.x+=c.dx end
+ end
+ if c.lastbtn[1]=='>' 
+ and c.lastbtn[2]!=nil then
+  if keys:down(r) then
+   c.dx+=5
+   c.x+=c.dx end
+ end
+ if c.lastbtn[1]=='^' 
+ and c.lastbtn[2]!=nil then
+  if keys:down(u) then
+   c.dy-=5
+   c.y+=c.dy end
+ end
+ if c.lastbtn[1]=='v' 
+ and c.lastbtn[2]!=nil then
+  if keys:down(d) then
+   c.dy+=5
+   c.y+=c.dy end
  end
 end
 
