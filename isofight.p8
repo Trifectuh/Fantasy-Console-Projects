@@ -105,8 +105,10 @@ function _update60()
     fb_hitcalc()
     char_dpad(c)
     char_move(c)
-    char_dash(c)
-    _updatebuffer(c)
+    char_dash(p[1])
+    _updatebuffer(p[1])
+    char_dash(p[2])
+    _updatebuffer(p[2])
     char_face()
     char_updateattacks(c)
     char_halt(c)
@@ -168,7 +170,7 @@ function _updatebuffer(c)
   l=8 r=9 u=10 d=11 end
  if c.lastbtn[2]!=nil then
   c.lastbtn[2]+=1 
-  if c.lastbtn[2]>16 then
+  if c.lastbtn[2]>24 then
    c.lastbtn[2]=nil end
  end
   if c.btnbuffer[16]!=nil then
@@ -272,27 +274,6 @@ function _drawchar(c)
  if c.status.falling==true and c.y>128 then
   print(c.fallcounter,c.sx+6,c.sy+6,c.clr)
  end
- local i=8
- print('b: ',0,16,14)
- for b in all(c.btnbuffer) do
-  print(b,i,16,14)
-  i+=6
-  if i>=6*16 then i=8 end
- end
- --if c.lastbtn[2]!=nil then
-  --print(btn(),8,24,14) end
- --print('l: ',0,16,14)
- --print(p[1].lwalldist,8,16,14)
- --print('r: ',0,24,14)
- --print(p[1].rwalldist,8,24,14)
- --print('a: ',0,16,14)
- --print(p[1].status.attacking,8,16,14)
- --print('b: ',0,24,14)
- --print(p[1].status.blocking,8,24,14)
- --print('f: ',0,32,14)
- --print(p[1].status.falling,8,32,14)
- --print('d: ',0,40,14)
- --print(p[1].status.dead,8,40,14)
 end
 
 function _drawz()
