@@ -39,6 +39,7 @@ function _init()
      halt=false,
      status={hp=50,
              stocks=2,
+             dashframe={0,nil},
              attacking=false,
              blocking=false,
              projectile=false,
@@ -80,6 +81,7 @@ function _init()
              stocks=2,
              attacking=false,
              blocking=false,
+             dashframe={0,nil},
              projectile=false,
              knockup=0,
              knockback=0,
@@ -501,34 +503,53 @@ function char_dpad(c)
 end
 
 function char_dash(c)
- local l local r local u local d
- if c==p[1] then
-  l=0 r=1 u=2 d=3
+ local dist=1
+ if c.status.dashframe[1]>0 then
+  if c.status.dashframe[2]=='<' then
+   c.dx=-c.status.dashframe[1]
+   c.x+=c.dx end
+  if c.status.dashframe[2]=='>' then
+   c.dx=c.status.dashframe[1]
+   c.x+=c.dx end
+  if c.status.dashframe[2]=='^' then
+   c.dy=-c.status.dashframe[1]
+   c.y+=c.dy end
+  if c.status.dashframe[2]=='v' then
+   c.dy=c.status.dashframe[1]
+   c.y+=c.dy end
+  c.status.dashframe[1]-=0.05
  else
-  l=8 r=9 u=10 d=11 end
- if c.lastbtn[1]=='<' 
- and c.lastbtn[2]!=nil then
-  if keys:down(l) then
-   c.dx-=5
-   c.x+=c.dx end
- end
- if c.lastbtn[1]=='>' 
- and c.lastbtn[2]!=nil then
-  if keys:down(r) then
-   c.dx+=5
-   c.x+=c.dx end
- end
- if c.lastbtn[1]=='^' 
- and c.lastbtn[2]!=nil then
-  if keys:down(u) then
-   c.dy-=5
-   c.y+=c.dy end
- end
- if c.lastbtn[1]=='v' 
- and c.lastbtn[2]!=nil then
-  if keys:down(d) then
-   c.dy+=5
-   c.y+=c.dy end
+  local l local r local u local d
+  if c==p[1] then
+   l=0 r=1 u=2 d=3
+  else
+   l=8 r=9 u=10 d=11 end
+  if c.lastbtn[1]=='<' 
+  and c.lastbtn[2]!=nil then
+   if keys:down(l) then
+    c.status.dashframe[1]=dist
+    c.status.dashframe[2]='<'
+   end
+  end
+  if c.lastbtn[1]=='>' 
+  and c.lastbtn[2]!=nil then
+   if keys:down(r) then
+    c.status.dashframe[1]=dist
+    c.status.dashframe[2]='>'
+   end
+  end
+  if c.lastbtn[1]=='^' 
+  and c.lastbtn[2]!=nil then
+   if keys:down(u) then
+    c.status.dashframe[1]=dist/1.25
+    c.status.dashframe[2]='^' end
+  end
+  if c.lastbtn[1]=='v' 
+  and c.lastbtn[2]!=nil then
+   if keys:down(d) then
+    c.status.dashframe[1]=dist/1.25
+    c.status.dashframe[2]='v' end
+  end
  end
 end
 
