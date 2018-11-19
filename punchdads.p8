@@ -3,7 +3,7 @@ version 16
 __lua__
 --punchdads: don't get punched and fall off!
 function _init()
-  drawtitle=false
+  drawtitle=true
   titleoffset=-32
   cameraoffset=0
   restarttimer=nil
@@ -123,6 +123,7 @@ function _update60()
    and p[2].roundwins<2 then
    _softrestart() 
   else _fullrestart() end
+ else keys:update()
  end
 end
 
@@ -213,9 +214,13 @@ function _draw()
 end
 
 function _drawtitle(q)
+if keys:up(4) or keys:up(12)then
+ drawtitle=false
+ return
+end
  startx=q
  starty=-128 
- rows=16
+ rows=12
  while rows>0 do
   x=startx 
   y=starty 
@@ -229,7 +234,11 @@ function _drawtitle(q)
   starty=starty+16
   rows=rows-1
  end
-
+ for x=0,121 do
+  print('\128',x,80,0)
+  print('press (n) or (tab) to start',10,80,6)
+  x+=8
+ end
 end
 
 function _drawui()
