@@ -1,7 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
---isofight: don't die or fall
+--punchdads: don't get punched and fall off!
 function _init()
   drawtitle=false
   titleoffset=-32
