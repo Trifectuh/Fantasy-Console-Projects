@@ -63,6 +63,11 @@ function TIC() {
 	rect(0, 0, 240, 68, 13)
 	rect(0, 69, 240, 136, 12)
 
+	player2Box = {
+		distanceArray: [],
+		xArray: []
+	}
+
 	for (x = 0; x < 120; x++) {
 		var cameraX = (2 * x - 1) / 120 - 1;
 		var rayDirX = player1.dirX + player1.planeX * cameraX;
@@ -85,6 +90,9 @@ function TIC() {
 		var hitEnemy = 0;
 		var side;
 
+		var enemyDistX;
+		var enemyDistY;
+
 		if (rayDirX < 0) {
 			stepX = -1;
 			sideDistX = (player1.posX - mapX) * deltaDistX;
@@ -100,12 +108,7 @@ function TIC() {
 			sideDistY = (mapY + 1.0 - player1.posY) * deltaDistY;
 		}
 
-		while (hit == 0 && hitEnemy == 0) {
-			if (mapX == Math.trunc(player2.posX) &&
-				mapY == Math.trunc(player2.posY)) {
-				hitEnemy = 1
-			}
-
+		while (hit == 0) {
 			if (sideDistX < sideDistY) {
 				sideDistX += deltaDistX;
 				mapX += stepX;
@@ -116,6 +119,14 @@ function TIC() {
 				side = 1;
 			}
 
+			if (mapX == Math.trunc(player2.posX) &&
+				mapY == Math.trunc(player2.posY)) {
+				enemyDistX = sideDistX + player2.posX - Math.trunc(player2.posX);
+				enemyDistY = sideDistY + player2.posY - Math.trunc(player2.posY);
+				player2Box.distanceArray.push(Math.sqrt(enemyDistX * enemyDistX + enemyDistY * enemyDistY));
+				player2Box.xArray.push(x)
+			}
+
 			if (worldMap[mapX][mapY] > 0) hit = 1;
 		}
 
@@ -124,12 +135,10 @@ function TIC() {
 		else perpWallDist = (mapY - player1.posY + (1 - stepY) / 2) / rayDirY;
 
 		var lineHeight = screen.height / perpWallDist;
-
 		var drawStart = -lineHeight / 2 + screen.height / 2;
 		if (drawStart < 0) drawStart = 0;
 		var drawEnd = lineHeight / 2 + screen.height / 2;
 		if (drawEnd >= screen.height) drawEnd = screen.height - 1;
-
 		var color = worldMap[mapX][mapY];
 
 		if (side == 1) {
@@ -139,7 +148,11 @@ function TIC() {
 		line(x, drawStart, x, drawEnd, color);
 	}
 
-	line(120, 0, 120, 136, 13);
+	for (var i = 0; i < player2Box.xArray.length - 1; i++) {
+		//draw player 2 on player 1's screen
+	}
+
+	line(120, 0, 120, 136, 0);
 
 	for (x = 121; x < 240; x++) {
 		var cameraX = (2 * x - 120) / 120 - 2
