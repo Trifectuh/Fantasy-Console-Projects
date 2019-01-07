@@ -44,7 +44,8 @@ const player1 = {
 	dirX: -1,
 	dirY: 0,
 	planeX: 0,
-	planeY: 0.66
+	planeY: 0.66,
+	zBuffer: new Array(120)
 };
 
 const player2 = {
@@ -53,20 +54,16 @@ const player2 = {
 	dirX: -1,
 	dirY: 0,
 	planeX: 0,
-	planeY: 0.66
+	planeY: 0.66,
+	zBuffer: new Array(120)
 };
 
 var timeElapsed = 0;
 var oldTimeElapsed = 0;
 
 function TIC() {
-	rect(0, 0, 240, 68, 13)
-	rect(0, 69, 240, 136, 12)
-
-	player2Box = {
-		distanceArray: [],
-		xArray: []
-	}
+	rect(0, 0, 240, 68, 13);
+	rect(0, 69, 240, 136, 12);
 
 	for (x = 0; x < 120; x++) {
 		var cameraX = (2 * x - 1) / 120 - 1;
@@ -89,9 +86,6 @@ function TIC() {
 		var hit = 0;
 		var hitEnemy = 0;
 		var side;
-
-		var enemyDistX;
-		var enemyDistY;
 
 		if (rayDirX < 0) {
 			stepX = -1;
@@ -119,19 +113,17 @@ function TIC() {
 				side = 1;
 			}
 
-			if (mapX == Math.trunc(player2.posX) &&
-				mapY == Math.trunc(player2.posY)) {
+			if (mapX == Math.trunc(player2.posX) && mapY == Math.trunc(player2.posY)) {
 				enemyDistX = sideDistX + player2.posX - Math.trunc(player2.posX);
 				enemyDistY = sideDistY + player2.posY - Math.trunc(player2.posY);
 				player2Box.distanceArray.push(Math.sqrt(enemyDistX * enemyDistX + enemyDistY * enemyDistY));
-				player2Box.xArray.push(x)
+				player2Box.xArray.push(x);
 			}
 
 			if (worldMap[mapX][mapY] > 0) hit = 1;
 		}
 
-		if (side == 0)
-			perpWallDist = (mapX - player1.posX + (1 - stepX) / 2) / rayDirX;
+		if (side == 0) perpWallDist = (mapX - player1.posX + (1 - stepX) / 2) / rayDirX;
 		else perpWallDist = (mapY - player1.posY + (1 - stepY) / 2) / rayDirY;
 
 		var lineHeight = screen.height / perpWallDist;
@@ -146,16 +138,47 @@ function TIC() {
 		}
 
 		line(x, drawStart, x, drawEnd, color);
+
+		player1.zBuffer[x] = perpWallDist;
 	}
 
-	for (var i = 0; i < player2Box.xArray.length - 1; i++) {
-		//draw player 2 on player 1's screen
+	// Draw Player 2 on Player 1's screen
+
+	var player2Dist =
+		(player1.posX - player2.posX) * (player1.posX - player2.posX) +
+		(player1.posY - player2.posY) * (player1.posY - player2.posY);
+
+	var spriteX = player2.posX - posX;
+	var spriteY = player2.posY - posY;
+
+	var invDet = 1.0 / (player1.planeX * player1.dirY - player1.dirX * player1.planeY);
+
+	var transformX = invDet * (player1.dirY * spriteX - player1.dirX * spriteY);
+	var transformY = invDet * (-player1.planeY * spriteX + planeX * spriteY);
+
+	var spriteScreenX = Math.trunc((screen.width / 2) * (1 + transformX / transformY));
+
+	var spriteHeight = Math.abs(screen.height / transformY);
+	var drawStartY = -spriteHeight / 2 + screen.height / 2;
+	if (drawStartY < 0) drawStartY = 0;
+	var drawEndY = spriteHeight / 2 + screen.height / 2;
+	if (drawEndY >= screen.height) drawEndY = screen.height - 1;
+
+	var spriteWidth = Math.abs(screen.height / transformY);
+	var drawStartX = -spriteWidth / 2 + spriteScreenX;
+	if (drawStartX < 0) drawStartX = 0;
+	var drawEndX = spriteWidth / 2 + spriteScreenX;
+	if (drawEndX >= screen.wodth) drawEndX = w - 1;
+
+	for (var stripe = drawStartX; stripe < drawEndX; stripe++) {
+		if (transformY > 0 && stripe > 0 && stripe < screen.width && transformY < player1.zBuffer[stripe])
+			line(stripe, drawStartY, stripe, drawEndY, 0);
 	}
 
 	line(120, 0, 120, 136, 0);
 
 	for (x = 121; x < 240; x++) {
-		var cameraX = (2 * x - 120) / 120 - 2
+		var cameraX = (2 * x - 120) / 120 - 2;
 		var rayDirX = player2.dirX + player2.planeX * cameraX;
 		var rayDirY = player2.dirY + player2.planeY * cameraX;
 
@@ -192,9 +215,8 @@ function TIC() {
 		}
 
 		while (hit == 0 && hitEnemy == 0) {
-			if (mapX == Math.trunc(player1.posX) &&
-				mapY == Math.trunc(player1.posY)) {
-				hitEnemy = 1
+			if (mapX == Math.trunc(player1.posX) && mapY == Math.trunc(player1.posY)) {
+				hitEnemy = 1;
 			}
 
 			if (sideDistX < sideDistY) {
@@ -210,8 +232,7 @@ function TIC() {
 			if (worldMap[mapX][mapY] > 0) hit = 1;
 		}
 
-		if (side == 0)
-			perpWallDist = (mapX - player2.posX + (1 - stepX) / 2) / rayDirX;
+		if (side == 0) perpWallDist = (mapX - player2.posX + (1 - stepX) / 2) / rayDirX;
 		else perpWallDist = (mapY - player2.posY + (1 - stepY) / 2) / rayDirY;
 
 		var lineHeight = screen.height / perpWallDist;
@@ -235,122 +256,71 @@ function TIC() {
 	var frameTime = (timeElapsed - oldTimeElapsed) / 1000.0;
 	print(Math.trunc(1.0 / frameTime));
 
-
 	var moveSpeed = frameTime * 5.0;
 	var rotSpeed = frameTime * 3.0;
 
 	if (btn(0)) {
-		if (
-			worldMap[Math.trunc(player1.posX + player1.dirX * moveSpeed)][
-			Math.trunc(player1.posY)
-			] == 0
-		)
+		if (worldMap[Math.trunc(player1.posX + player1.dirX * moveSpeed)][Math.trunc(player1.posY)] == 0)
 			player1.posX += player1.dirX * moveSpeed;
-		if (
-			worldMap[Math.trunc(player1.posX)][
-			Math.trunc(player1.posY + player1.dirY * moveSpeed)
-			] == 0
-		)
+		if (worldMap[Math.trunc(player1.posX)][Math.trunc(player1.posY + player1.dirY * moveSpeed)] == 0)
 			player1.posY += player1.dirY * moveSpeed;
 	}
 
 	if (btn(1)) {
-		if (
-			worldMap[Math.trunc(player1.posX - player1.dirX * moveSpeed)][
-			Math.trunc(player1.posY)
-			] == 0
-		)
+		if (worldMap[Math.trunc(player1.posX - player1.dirX * moveSpeed)][Math.trunc(player1.posY)] == 0)
 			player1.posX -= player1.dirX * moveSpeed;
-		if (
-			worldMap[Math.trunc(player1.posX)][
-			Math.trunc(player1.posY - player1.dirY * moveSpeed)
-			] == 0
-		)
+		if (worldMap[Math.trunc(player1.posX)][Math.trunc(player1.posY - player1.dirY * moveSpeed)] == 0)
 			player1.posY -= player1.dirY * moveSpeed;
 	}
 
 	if (btn(2)) {
 		var oldDirX = player1.dirX;
-		player1.dirX =
-			player1.dirX * Math.cos(rotSpeed) - player1.dirY * Math.sin(rotSpeed);
-		player1.dirY =
-			oldDirX * Math.sin(rotSpeed) + player1.dirY * Math.cos(rotSpeed);
+		player1.dirX = player1.dirX * Math.cos(rotSpeed) - player1.dirY * Math.sin(rotSpeed);
+		player1.dirY = oldDirX * Math.sin(rotSpeed) + player1.dirY * Math.cos(rotSpeed);
 		var oldPlaneX = player1.planeX;
-		player1.planeX =
-			player1.planeX * Math.cos(rotSpeed) - player1.planeY * Math.sin(rotSpeed);
-		player1.planeY =
-			oldPlaneX * Math.sin(rotSpeed) + player1.planeY * Math.cos(rotSpeed);
+		player1.planeX = player1.planeX * Math.cos(rotSpeed) - player1.planeY * Math.sin(rotSpeed);
+		player1.planeY = oldPlaneX * Math.sin(rotSpeed) + player1.planeY * Math.cos(rotSpeed);
 	}
 
 	if (btn(3)) {
 		var oldDirX = player1.dirX;
-		player1.dirX =
-			player1.dirX * Math.cos(-rotSpeed) - player1.dirY * Math.sin(-rotSpeed);
-		player1.dirY =
-			oldDirX * Math.sin(-rotSpeed) + player1.dirY * Math.cos(-rotSpeed);
+		player1.dirX = player1.dirX * Math.cos(-rotSpeed) - player1.dirY * Math.sin(-rotSpeed);
+		player1.dirY = oldDirX * Math.sin(-rotSpeed) + player1.dirY * Math.cos(-rotSpeed);
 		var oldPlaneX = player1.planeX;
-		player1.planeX =
-			player1.planeX * Math.cos(-rotSpeed) -
-			player1.planeY * Math.sin(-rotSpeed);
-		player1.planeY =
-			oldPlaneX * Math.sin(-rotSpeed) + player1.planeY * Math.cos(-rotSpeed);
+		player1.planeX = player1.planeX * Math.cos(-rotSpeed) - player1.planeY * Math.sin(-rotSpeed);
+		player1.planeY = oldPlaneX * Math.sin(-rotSpeed) + player1.planeY * Math.cos(-rotSpeed);
 	}
 
 	if (btn(0)) {
-		if (
-			worldMap[Math.trunc(player2.posX + player2.dirX * moveSpeed)][
-			Math.trunc(player2.posY)
-			] == 0
-		)
+		if (worldMap[Math.trunc(player2.posX + player2.dirX * moveSpeed)][Math.trunc(player2.posY)] == 0)
 			player2.posX += player2.dirX * moveSpeed;
-		if (
-			worldMap[Math.trunc(player2.posX)][
-			Math.trunc(player2.posY + player2.dirY * moveSpeed)
-			] == 0
-		)
+		if (worldMap[Math.trunc(player2.posX)][Math.trunc(player2.posY + player2.dirY * moveSpeed)] == 0)
 			player2.posY += player2.dirY * moveSpeed;
 	}
 
 	if (btn(1)) {
-		if (
-			worldMap[Math.trunc(player2.posX - player2.dirX * moveSpeed)][
-			Math.trunc(player2.posY)
-			] == 0
-		)
+		if (worldMap[Math.trunc(player2.posX - player2.dirX * moveSpeed)][Math.trunc(player2.posY)] == 0)
 			player2.posX -= player2.dirX * moveSpeed;
-		if (
-			worldMap[Math.trunc(player2.posX)][
-			Math.trunc(player2.posY - player2.dirY * moveSpeed)
-			] == 0
-		)
+		if (worldMap[Math.trunc(player2.posX)][Math.trunc(player2.posY - player2.dirY * moveSpeed)] == 0)
 			player2.posY -= player2.dirY * moveSpeed;
 	}
 
 	if (btn(2)) {
 		var oldDirX = player2.dirX;
-		player2.dirX =
-			player2.dirX * Math.cos(rotSpeed) - player2.dirY * Math.sin(rotSpeed);
-		player2.dirY =
-			oldDirX * Math.sin(rotSpeed) + player2.dirY * Math.cos(rotSpeed);
+		player2.dirX = player2.dirX * Math.cos(rotSpeed) - player2.dirY * Math.sin(rotSpeed);
+		player2.dirY = oldDirX * Math.sin(rotSpeed) + player2.dirY * Math.cos(rotSpeed);
 		var oldPlaneX = player2.planeX;
-		player2.planeX =
-			player2.planeX * Math.cos(rotSpeed) - player2.planeY * Math.sin(rotSpeed);
-		player2.planeY =
-			oldPlaneX * Math.sin(rotSpeed) + player2.planeY * Math.cos(rotSpeed);
+		player2.planeX = player2.planeX * Math.cos(rotSpeed) - player2.planeY * Math.sin(rotSpeed);
+		player2.planeY = oldPlaneX * Math.sin(rotSpeed) + player2.planeY * Math.cos(rotSpeed);
 	}
 
 	if (btn(3)) {
 		var oldDirX = player2.dirX;
-		player2.dirX =
-			player2.dirX * Math.cos(-rotSpeed) - player2.dirY * Math.sin(-rotSpeed);
-		player2.dirY =
-			oldDirX * Math.sin(-rotSpeed) + player2.dirY * Math.cos(-rotSpeed);
+		player2.dirX = player2.dirX * Math.cos(-rotSpeed) - player2.dirY * Math.sin(-rotSpeed);
+		player2.dirY = oldDirX * Math.sin(-rotSpeed) + player2.dirY * Math.cos(-rotSpeed);
 		var oldPlaneX = player2.planeX;
-		player2.planeX =
-			player2.planeX * Math.cos(-rotSpeed) -
-			player2.planeY * Math.sin(-rotSpeed);
-		player2.planeY =
-			oldPlaneX * Math.sin(-rotSpeed) + player2.planeY * Math.cos(-rotSpeed);
+		player2.planeX = player2.planeX * Math.cos(-rotSpeed) - player2.planeY * Math.sin(-rotSpeed);
+		player2.planeY = oldPlaneX * Math.sin(-rotSpeed) + player2.planeY * Math.cos(-rotSpeed);
 	}
 }
 
@@ -378,4 +348,3 @@ function TIC() {
 // <PALETTE>
 // 000:140c1c44243430346d4e4a4e854c30346524d04648757161597dced27d2c8595a16daa2cd2aa996dc2cadad45edeeed6
 // </PALETTE>
-
