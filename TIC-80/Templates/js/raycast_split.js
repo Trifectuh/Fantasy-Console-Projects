@@ -158,9 +158,20 @@ function TIC() {
 	var p2drawEndX = Math.trunc(0.5 * (p2spriteWidth + p2spriteScreenX)) + 30;
 	if (p2drawEndX >= 120) p2drawEndX = 120;
 
+	// replace this with textri???
 	for (var stripe = p2drawStartX; stripe < p2drawEndX; stripe++) {
 		if (p2transformY > 0 && stripe >= 0 && stripe <= 120 && p2transformY < player1.zBuffer[stripe]) {
-			line(stripe, p2drawStartY, stripe, p2drawEndY, 0);
+			if (stripe - p2drawStartX < p2spriteWidth * 0.15)
+				line(stripe, p2drawStartY + p2spriteHeight / 6, stripe, p2drawEndY - p2spriteHeight / 6, 5);
+			else if (stripe - p2drawStartX < p2spriteWidth * 0.4 && stripe - p2drawStartX > p2spriteWidth * 0.35) {
+				line(stripe, p2drawStartY, stripe, p2drawEndY, 5);
+				line(stripe, p2drawStartY + p2spriteHeight / 14, stripe, p2drawEndY - p2spriteHeight / 1.8, 0);
+			} else if (stripe - p2drawStartX < p2spriteWidth * 0.6 && stripe - p2drawStartX > p2spriteWidth * 0.55) {
+				line(stripe, p2drawStartY, stripe, p2drawEndY, 5);
+				line(stripe, p2drawStartY + p2spriteHeight / 14, stripe, p2drawEndY - p2spriteHeight / 1.8, 0);
+			} else if (stripe - p2drawStartX > p2spriteWidth * 0.8)
+				line(stripe, p2drawStartY + p2spriteHeight / 6, stripe, p2drawEndY - p2spriteHeight / 6, 5);
+			else line(stripe, p2drawStartY, stripe, p2drawEndY, 5);
 		}
 	}
 
@@ -204,7 +215,6 @@ function TIC() {
 		}
 
 		while (hit == 0) {
-
 			if (sideDistX < sideDistY) {
 				sideDistX += deltaDistX;
 				mapX += stepX;
@@ -235,7 +245,7 @@ function TIC() {
 		}
 
 		line(x, drawStart, x, drawEnd, color);
-		player1.zBuffer[x - 120] = perpWallDist;
+		player2.zBuffer[x - 120] = perpWallDist;
 	}
 
 	// Draw Player 1 on Player 2's screen
@@ -261,11 +271,21 @@ function TIC() {
 	var p1drawEndX = 121 + Math.trunc(0.5 * (p1spriteWidth + p1spriteScreenX)) - 30;
 	if (p1drawEndX >= 240) p1drawEndX = 240;
 
+	// replace this with textri???
 	for (var stripe = p1drawStartX; stripe < p1drawEndX; stripe++) {
-		if (p1transformY > 0 && stripe >= 121 && stripe <= 240) {  // && p1transformY < player2.zBuffer[stripe - 120]
-			line(stripe, p1drawStartY, stripe, p1drawEndY, 0);
-			trace('drawing player 1');
-		} else trace('not drawing player 1')
+		if (p1transformY > 0 && stripe >= 121 && stripe <= 240 && p1transformY < player2.zBuffer[stripe - 120]) {
+			if (stripe - p1drawStartX < p1spriteWidth * 0.15)
+				line(stripe, p1drawStartY + p1spriteHeight / 6, stripe, p1drawEndY - p1spriteHeight / 6, 5);
+			else if (stripe - p1drawStartX < p1spriteWidth * 0.4 && stripe - p1drawStartX > p1spriteWidth * 0.35) {
+				line(stripe, p1drawStartY, stripe, p1drawEndY, 5);
+				line(stripe, p1drawStartY + p1spriteHeight / 14, stripe, p1drawEndY - p1spriteHeight / 1.8, 0);
+			} else if (stripe - p1drawStartX < p1spriteWidth * 0.6 && stripe - p1drawStartX > p1spriteWidth * 0.55) {
+				line(stripe, p1drawStartY, stripe, p1drawEndY, 5);
+				line(stripe, p1drawStartY + p1spriteHeight / 14, stripe, p1drawEndY - p1spriteHeight / 1.8, 0);
+			} else if (stripe - p1drawStartX > p1spriteWidth * 0.8)
+				line(stripe, p1drawStartY + p1spriteHeight / 6, stripe, p1drawEndY - p1spriteHeight / 6, 5);
+			else line(stripe, p1drawStartY, stripe, p1drawEndY, 5);
+		}
 	}
 
 	oldTimeElapsed = timeElapsed;
@@ -273,8 +293,8 @@ function TIC() {
 	var frameTime = (timeElapsed - oldTimeElapsed) / 1000.0;
 	print(Math.trunc(1.0 / frameTime));
 
-	var moveSpeed = frameTime * 5.0;
-	var rotSpeed = frameTime * 3.0;
+	var moveSpeed = frameTime * 4.0;
+	var rotSpeed = frameTime * 2.5;
 
 	// if (btn(0)) {
 	// 	if (worldMap[Math.trunc(player1.posX + player1.dirX * moveSpeed)][Math.trunc(player1.posY)] == 0)
