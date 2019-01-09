@@ -64,7 +64,7 @@ var timeElapsed = 0;
 var oldTimeElapsed = 0;
 
 function sget(x, y) {
-	return peek4(32768 + 56 * (x / 8) + 960 * (y / 8) + x + 8 * y);
+	return peek4(32768 + 56 * (x / 8 | 0) + 960 * (y / 8 | 0) + x + 8 * (y | 0));
 }
 
 function TIC() {
@@ -158,7 +158,7 @@ function TIC() {
 	var p2drawEndY = p2spriteHeight / 2 + 136 / 2;
 	if (p2drawEndY >= 136) p2drawEndY = 136 - 1;
 
-	var p2spriteWidth = Math.abs(Math.trunc(0.5 * (136 / p2transformY)));
+	var p2spriteWidth = Math.abs(Math.trunc(0.75 * (136 / p2transformY)));
 	var p2drawStartX = Math.trunc(0.5 * (-p2spriteWidth + p2spriteScreenX)) + 30;
 	if (p2drawStartX < 0) p2drawStartX = 0;
 	var p2drawEndX = Math.trunc(0.5 * (p2spriteWidth + p2spriteScreenX)) + 30;
@@ -166,12 +166,12 @@ function TIC() {
 
 	for (var stripe = p2drawStartX; stripe < p2drawEndX; stripe++) {
 		var texX = Math.trunc((32 * (stripe - p2drawStartX)) / (p2drawEndX - p2drawStartX));
-		trace(texX);
 		if (p2transformY > 0 && stripe >= 0 && stripe <= 120 && p2transformY < player1.zBuffer[stripe]) {
 			for (var y = p2drawStartY; y < p2drawEndY; y++) {
-				var texY = Math.trunc((32 * (y - p2drawStartY)) / (p2drawEndY - p2drawStartY)) / 128;
+				var texY = Math.trunc((32 * (y - p2drawStartY)) / (p2drawEndY - p2drawStartY));
 				var color = sget(texX, texY);
-				pix(stripe, y, color);
+				if (color != 15)
+					pix(stripe, y, color);
 			}
 		}
 	}
@@ -260,32 +260,27 @@ function TIC() {
 
 	var p1spriteScreenX = 121 + Math.trunc((120 / 2) * (1 + p1transformX / p1transformY));
 
-	var p1spriteHeight = Math.abs(Math.trunc(136 / p1transformY));
+	var p1spriteHeight = Math.abs(Math.trunc(136 / p1transformY)) + 3;
 	var p1drawStartY = -p1spriteHeight / 5 + 136 / 2;
 	if (p1drawStartY < 0) p1drawStartY = 0;
 	var p1drawEndY = p1spriteHeight / 2 + 136 / 2;
 	if (p1drawEndY >= 136) p1drawEndY = 136 - 1;
 
-	var p1spriteWidth = Math.abs(Math.trunc(0.5 * (136 / p1transformY)));
+	var p1spriteWidth = Math.abs(Math.trunc(0.75 * (136 / p1transformY)));
 	var p1drawStartX = 121 + Math.trunc(0.5 * (-p1spriteWidth + p1spriteScreenX)) - 30;
 	if (p1drawStartX < 121) p1drawStartX = 121;
 	var p1drawEndX = 121 + Math.trunc(0.5 * (p1spriteWidth + p1spriteScreenX)) - 30;
 	if (p1drawEndX >= 240) p1drawEndX = 240;
 
-	// replace this with textri???
 	for (var stripe = p1drawStartX; stripe < p1drawEndX; stripe++) {
-		if (p1transformY > 0 && stripe >= 121 && stripe <= 240 && p1transformY < player2.zBuffer[stripe - 120]) {
-			if (stripe - p1drawStartX < p1spriteWidth * 0.15)
-				line(stripe, p1drawStartY + p1spriteHeight / 6, stripe, p1drawEndY - p1spriteHeight / 6, 5);
-			else if (stripe - p1drawStartX < p1spriteWidth * 0.4 && stripe - p1drawStartX > p1spriteWidth * 0.35) {
-				line(stripe, p1drawStartY, stripe, p1drawEndY, 5);
-				line(stripe, p1drawStartY + p1spriteHeight / 14, stripe, p1drawEndY - p1spriteHeight / 1.8, 0);
-			} else if (stripe - p1drawStartX < p1spriteWidth * 0.6 && stripe - p1drawStartX > p1spriteWidth * 0.55) {
-				line(stripe, p1drawStartY, stripe, p1drawEndY, 5);
-				line(stripe, p1drawStartY + p1spriteHeight / 14, stripe, p1drawEndY - p1spriteHeight / 1.8, 0);
-			} else if (stripe - p1drawStartX > p1spriteWidth * 0.8)
-				line(stripe, p1drawStartY + p1spriteHeight / 6, stripe, p1drawEndY - p1spriteHeight / 6, 5);
-			else line(stripe, p1drawStartY, stripe, p1drawEndY, 5);
+		var texX = Math.trunc((32 * (stripe - p1drawStartX)) / (p1drawEndX - p1drawStartX));
+		if (p1transformY > 0 && stripe >= 120 && stripe <= 240 && p1transformY < player2.zBuffer[stripe - 120]) {
+			for (var y = p1drawStartY; y < p1drawEndY; y++) {
+				var texY = Math.trunc((32 * (y - p1drawStartY)) / (p1drawEndY - p1drawStartY));
+				var color = sget(texX + 32, texY);
+				if (color != 15)
+					pix(stripe, y, color);
+			}
 		}
 	}
 
@@ -445,3 +440,4 @@ function TIC() {
 // <PALETTE>
 // 000:140c1c44243430346d4e4a4e854c30346524d04648757161597dced27d2c8595a16daa2cd2aa996dc2cadad45edeeed6
 // </PALETTE>
+
