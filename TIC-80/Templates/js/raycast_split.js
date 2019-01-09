@@ -323,16 +323,16 @@ function TIC() {
 	// }
 
 	if (btn(0)) {
-		if (worldMap[Math.trunc(player2.posX + 1 + player2.dirX * moveSpeed)][Math.trunc(player2.posY)] == 0)
+		if (worldMap[Math.trunc(player2.posX - 1 + player2.dirX * moveSpeed)][Math.trunc(player2.posY)] == 0)
 			player2.posX += player2.dirX * moveSpeed;
-		if (worldMap[Math.trunc(player2.posX)][Math.trunc(player2.posY + 1 + player2.dirY * moveSpeed)] == 0)
+		if (worldMap[Math.trunc(player2.posX)][Math.trunc(player2.posY - 1 + player2.dirY * moveSpeed)] == 0)
 			player2.posY += player2.dirY * moveSpeed;
 	}
 
 	if (btn(1)) {
-		if (worldMap[Math.trunc(player2.posX - 1 - player2.dirX * moveSpeed)][Math.trunc(player2.posY)] == 0)
+		if (worldMap[Math.trunc(player2.posX + 1 - player2.dirX * moveSpeed)][Math.trunc(player2.posY)] == 0)
 			player2.posX -= player2.dirX * moveSpeed;
-		if (worldMap[Math.trunc(player2.posX)][Math.trunc(player2.posY - 1 - player2.dirY * moveSpeed)] == 0)
+		if (worldMap[Math.trunc(player2.posX)][Math.trunc(player2.posY + 1 - player2.dirY * moveSpeed)] == 0)
 			player2.posY -= player2.dirY * moveSpeed;
 	}
 
