@@ -165,7 +165,7 @@ function TIC() {
 	if (p2drawEndX >= 120) p2drawEndX = 120;
 
 	for (var stripe = p2drawStartX; stripe < p2drawEndX; stripe++) {
-		var texX = Math.trunc((32 * (stripe - (-p2spriteWidth / 2 + p2spriteScreenX))) / p2spriteWidth);
+		var texX = Math.trunc((32 * (stripe - (-p2spriteWidth / 2 + p2spriteScreenX))) / p2spriteWidth / 32);
 		if (p2transformY > 0 && stripe >= 0 && stripe <= 120 && p2transformY < player1.zBuffer[stripe]) {
 			for (var y = p2drawStartY; y < p2drawEndY; y++) {
 				var texY = Math.trunc((32 * (y - p2drawStartY)) / (p2drawEndY - p2drawStartY));
