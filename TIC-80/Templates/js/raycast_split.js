@@ -153,7 +153,7 @@ function TIC() {
 	var p2spriteScreenX = Math.trunc((120 / 2) * (1 + p2transformX / p2transformY));
 
 	var p2spriteHeight = Math.abs(Math.trunc(136 / p2transformY));
-	var p2drawStartY = -p2spriteHeight / 5 + 136 / 2;
+	var p2drawStartY = -p2spriteHeight / 2 + 136 / 2;
  var p2yOffset = 0;
 	if (p2drawStartY < 0) {
 		p2yOffset = Math.abs(p2drawStartY);
