@@ -174,7 +174,6 @@ function TIC() {
 				pix(stripe, y, color);
 			}
 		}
-		S;
 	}
 
 	line(120, 0, 120, 136, 0);
