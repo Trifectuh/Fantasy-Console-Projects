@@ -61,6 +61,11 @@ const player2 = {
 var timeElapsed = 0;
 var oldTimeElapsed = 0;
 
+function sget(x, y) {
+	var addr = 0x4000 + (x / 8 + (y / 8) * 16) * 16; // get sprite address
+	return peek4(addr * 2 + (x % 8) + (y % 8) * 8); // get sprite pixel
+}
+
 function TIC() {
 	rect(0, 0, 240, 68, 13);
 	rect(0, 69, 240, 136, 12);
@@ -362,14 +367,22 @@ function TIC() {
 }
 
 // <TILES>
-// 001:efffffffff222222f8888888f8222222f8fffffff8ff0ffff8ff0ffff8ff0fff
-// 002:fffffeee2222ffee88880fee22280feefff80fff0ff80f0f0ff80f0f0ff80f0f
-// 003:efffffffff222222f8888888f8222222f8fffffff8fffffff8ff0ffff8ff0fff
-// 004:fffffeee2222ffee88880fee22280feefff80ffffff80f0f0ff80f0f0ff80f0f
-// 017:f8fffffff8888888f888f888f8888ffff8888888f2222222ff000fffefffffef
-// 018:fff800ff88880ffef8880fee88880fee88880fee2222ffee000ffeeeffffeeee
-// 019:f8fffffff8888888f888f888f8888ffff8888888f2222222ff000fffefffffef
-// 020:fff800ff88880ffef8880fee88880fee88880fee2222ffee000ffeeeffffeeee
+// 000:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+// 001:ccccc228cccc2222cccc277acccc2777cccc2222cccc2222ccccc212ccc22112
+// 002:888ccccc2288ccccaaa8ccccaaa8cccc2888cccc2222cccc288ccccc288888cc
+// 003:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+// 016:ccccccccccccccccccccccccccccccccccccccc2ccccccc2ccccccc2ccccccc2
+// 017:cc222222c22222222222222222228222222882222288222222282222767a2222
+// 018:2822288c22222288222222282221222822212222222212222222812222228122
+// 019:cccccccccccccccccccccccc8ccccccc8ccccccc8ccccccc8ccccccc8ccccccc
+// 032:ccccccc3ccccccc3cccccccccccccccccccccccccccccccccccccccccccccccc
+// 033:7767a33637003a363000072233003322c3333222ccc22221ccc22221ccc22221
+// 034:6777a1226777a1182222811822228813222228332222283c2222283c222228cc
+// 035:cccccccccccccccc7ccccccc7ccccccc7ccccccccccccccccccccccccccccccc
+// 048:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+// 049:ccc22211cccc2211cccc2211ccccc221ccccc221ccccc731cccc7731cccc7331
+// 050:222228cc122288cc12228ccc12228ccc22228ccc17aacccc77aaaccc7333accc
+// 051:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 // </TILES>
 
 // <WAVES>
@@ -385,3 +398,4 @@ function TIC() {
 // <PALETTE>
 // 000:140c1c44243430346d4e4a4e854c30346524d04648757161597dced27d2c8595a16daa2cd2aa996dc2cadad45edeeed6
 // </PALETTE>
+
