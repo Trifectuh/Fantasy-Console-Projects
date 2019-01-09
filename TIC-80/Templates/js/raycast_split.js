@@ -45,25 +45,26 @@ const player1 = {
 	dirY: 0,
 	planeX: 0,
 	planeY: 0.66,
-	zBuffer: new Array(120)
+	zBuffer: new Array(120),
+	sprite: 0
 };
 
 const player2 = {
-	posX: 12,
+	posX: 21,
 	posY: 11,
 	dirX: -1,
 	dirY: 0,
 	planeX: 0,
 	planeY: 0.66,
-	zBuffer: new Array(120)
+	zBuffer: new Array(120),
+	sprite: 4
 };
 
 var timeElapsed = 0;
 var oldTimeElapsed = 0;
 
 function sget(x, y) {
-	var addr = 0x4000 + (x / 8 + (y / 8) * 16) * 16; // get sprite address
-	return peek4(addr * 2 + (x % 8) + (y % 8) * 8); // get sprite pixel
+	return peek4(32768 + 56 * (x / 8) + 960 * (y / 8) + x + 8 * y);
 }
 
 function TIC() {
@@ -163,21 +164,17 @@ function TIC() {
 	var p2drawEndX = Math.trunc(0.5 * (p2spriteWidth + p2spriteScreenX)) + 30;
 	if (p2drawEndX >= 120) p2drawEndX = 120;
 
-	// replace this with textri???
 	for (var stripe = p2drawStartX; stripe < p2drawEndX; stripe++) {
+		var texX = Math.trunc((32 * (stripe - p2drawStartX)) / (p2drawEndX - p2drawStartX));
+		trace(texX);
 		if (p2transformY > 0 && stripe >= 0 && stripe <= 120 && p2transformY < player1.zBuffer[stripe]) {
-			if (stripe - p2drawStartX < p2spriteWidth * 0.15)
-				line(stripe, p2drawStartY + p2spriteHeight / 6, stripe, p2drawEndY - p2spriteHeight / 6, 5);
-			else if (stripe - p2drawStartX < p2spriteWidth * 0.4 && stripe - p2drawStartX > p2spriteWidth * 0.35) {
-				line(stripe, p2drawStartY, stripe, p2drawEndY, 5);
-				line(stripe, p2drawStartY + p2spriteHeight / 14, stripe, p2drawEndY - p2spriteHeight / 1.8, 0);
-			} else if (stripe - p2drawStartX < p2spriteWidth * 0.6 && stripe - p2drawStartX > p2spriteWidth * 0.55) {
-				line(stripe, p2drawStartY, stripe, p2drawEndY, 5);
-				line(stripe, p2drawStartY + p2spriteHeight / 14, stripe, p2drawEndY - p2spriteHeight / 1.8, 0);
-			} else if (stripe - p2drawStartX > p2spriteWidth * 0.8)
-				line(stripe, p2drawStartY + p2spriteHeight / 6, stripe, p2drawEndY - p2spriteHeight / 6, 5);
-			else line(stripe, p2drawStartY, stripe, p2drawEndY, 5);
+			for (var y = p2drawStartY; y < p2drawEndY; y++) {
+				var texY = Math.trunc((32 * (y - p2drawStartY)) / (p2drawEndY - p2drawStartY)) / 128;
+				var color = sget(texX, texY);
+				pix(stripe, y, color);
+			}
 		}
+		S;
 	}
 
 	line(120, 0, 120, 136, 0);
@@ -401,6 +398,41 @@ function TIC() {
 // 055:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 // </TILES>
 
+// <SPRITES>
+// 000:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+// 001:fffff228ffff2222ffff277affff2777ffff2222ffff2222fffff212fff22112
+// 002:888fffff2288ffffaaa8ffffaaa8ffff2888ffff2222ffff288fffff288888ff
+// 003:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+// 004:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+// 005:fffff66cffff6666ffff677affff6777ffff6666ffff6666fffff616fff66116
+// 006:cccfffff66ccffffaaacffffaaacffff6cccffff6666ffff6ccfffff6cccccff
+// 007:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+// 016:fffffffffffffffffffffffffffffffffffffff2fffffff2fffffff2fffffff2
+// 017:ff222222f22222222222222222228222222882222288222222282222767a2222
+// 018:2822288f22222288222222282221222822212222222212222222812222228122
+// 019:ffffffffffffffffffffffff8fffffff8fffffff8fffffff8fffffff8fffffff
+// 020:fffffffffffffffffffffffffffffffffffffff6fffffff6fffffff6fffffff6
+// 021:ff666666f6666666666666666666c666666cc66666cc6666666c66667b7a6666
+// 022:6c666ccf666666cc6666666c6661666c66616666666616666666c1666666c166
+// 023:ffffffffffffffffffffffffcfffffffcfffffffcfffffffcfffffffcfffffff
+// 032:fffffff3fffffff3ffffffffffffffffffffffffffffffffffffffffffffffff
+// 033:7767a33637003a363000072233003322f3333222fff22221fff22221fff22221
+// 034:6777a1226777a1182222811822228813222228332222283f2222283f222228ff
+// 035:ffffffffffffffff7fffffff7fffffff7fffffffffffffffffffffffffffffff
+// 036:fffffff3fffffff3ffffffffffffffffffffffffffffffffffffffffffffffff
+// 037:77b7a33237003a323000076633003366f3333666fff66661fff66661fff66661
+// 038:2777a1662777a11c6666c11c6666cc1366666c3366666c3f66666c3f66666cff
+// 039:ffffffffffffffff7fffffff7fffffff7fffffffffffffffffffffffffffffff
+// 048:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+// 049:fff22211ffff2211ffff2211fffff221fffff221fffff731ffff7731ffff7331
+// 050:222228ff122288ff12228fff12228fff22228fff17aaffff77aaafff7333afff
+// 051:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+// 052:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+// 053:fff66611ffff6611ffff6611fffff661fffff661fffff731ffff7731ffff7331
+// 054:66666cff1666ccff1666cfff1666cfff6666cfff17aaffff77aaafff7333afff
+// 055:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+// </SPRITES>
+
 // <WAVES>
 // 000:00000000ffffffff00000000ffffffff
 // 001:0123456789abcdeffedcba9876543210
@@ -414,4 +446,3 @@ function TIC() {
 // <PALETTE>
 // 000:140c1c44243430346d4e4a4e854c30346524d04648757161597dced27d2c8595a16daa2cd2aa996dc2cadad45edeeed6
 // </PALETTE>
-
