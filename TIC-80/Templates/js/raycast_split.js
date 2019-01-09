@@ -152,17 +152,17 @@ function TIC() {
 
 	var p2spriteScreenX = Math.trunc((120 / 2) * (1 + p2transformX / p2transformY));
 
-	var p2spriteHeight = Math.abs(Math.trunc((0.75 * 136) / p2transformY));
-	var p2drawStartY = -p2spriteHeight / 2 + 136 / 2;
+	var p2spriteHeight = Math.abs(Math.trunc((136 / p2transformY)/1.5));
+	var p2drawStartY = (-p2spriteHeight / 2 + 136 / 2)+p2spriteHeight/1.5;
 	var p2yOffset = 0;
 	if (p2drawStartY < 0) {
 		p2yOffset = Math.abs(p2drawStartY);
 		p2drawStartY = 0;
 	}
-	var p2drawEndY = p2spriteHeight / 2 + 136 / 2;
+	var p2drawEndY = (p2spriteHeight / 2 + 136 / 2)+p2spriteHeight/1.5;
 	if (p2drawEndY >= 136) p2drawEndY = 136 - 1;
 
-	var p2spriteWidth = Math.abs(Math.trunc(0.75 * (136 / p2transformY)));
+	var p2spriteWidth = Math.abs(Math.trunc((136 / p2transformY)));
 	var p2drawStartX = Math.trunc(0.5 * (-p2spriteWidth + p2spriteScreenX)) + 30;
 	var p2xOffset = 0;
 	if (p2drawStartX < 0) {
@@ -446,3 +446,4 @@ function TIC() {
 // <PALETTE>
 // 000:140c1c44243430346d4e4a4e854c30346524d04648757161597dced27d2c8595a16daa2cd2aa996dc2cadad45edeeed6
 // </PALETTE>
+
