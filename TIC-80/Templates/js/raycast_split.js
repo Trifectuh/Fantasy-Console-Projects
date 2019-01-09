@@ -152,9 +152,9 @@ function TIC() {
 
 	var p2spriteScreenX = Math.trunc((120 / 2) * (1 + p2transformX / p2transformY));
 
-	var p2spriteHeight = Math.abs(Math.trunc(136 / p2transformY));
+	var p2spriteHeight = Math.abs(Math.trunc((0.75 * 136) / p2transformY));
 	var p2drawStartY = -p2spriteHeight / 2 + 136 / 2;
- var p2yOffset = 0;
+	var p2yOffset = 0;
 	if (p2drawStartY < 0) {
 		p2yOffset = Math.abs(p2drawStartY);
 		p2drawStartY = 0;
@@ -176,7 +176,7 @@ function TIC() {
 		var texX = Math.trunc((32 * (stripe - p2drawStartX + p2xOffset)) / p2spriteWidth);
 		if (p2transformY > 0 && stripe >= 0 && stripe <= 120 && p2transformY < player1.zBuffer[stripe]) {
 			for (var y = p2drawStartY; y < p2drawEndY; y++) {
-				var texY = Math.trunc((32 * (y - p2drawStartY + p2yOffset)) / (p2spriteHeight));
+				var texY = Math.trunc((32 * (y - p2drawStartY + p2yOffset)) / p2spriteHeight);
 				var color = sget(texX, texY);
 				if (color != 15) pix(stripe, y, color);
 			}
@@ -446,4 +446,3 @@ function TIC() {
 // <PALETTE>
 // 000:140c1c44243430346d4e4a4e854c30346524d04648757161597dced27d2c8595a16daa2cd2aa996dc2cadad45edeeed6
 // </PALETTE>
-
