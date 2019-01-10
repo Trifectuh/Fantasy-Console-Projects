@@ -306,46 +306,46 @@ function TIC() {
 	var moveSpeed = frameTime * 4.0;
 	var rotSpeed = frameTime * 2.5;
 
-	// if (btn(0)) {
-	// 	if (worldMap[Math.trunc(player1.posX + player1.dirX * moveSpeed)][Math.trunc(player1.posY)] == 0)
-	// 		player1.posX += player1.dirX * moveSpeed;
-	// 	if (worldMap[Math.trunc(player1.posX)][Math.trunc(player1.posY + player1.dirY * moveSpeed)] == 0)
-	// 		player1.posY += player1.dirY * moveSpeed;
-	// }
-
-	// if (btn(1)) {
-	// 	if (worldMap[Math.trunc(player1.posX - player1.dirX * moveSpeed)][Math.trunc(player1.posY)] == 0)
-	// 		player1.posX -= player1.dirX * moveSpeed;
-	// 	if (worldMap[Math.trunc(player1.posX)][Math.trunc(player1.posY - player1.dirY * moveSpeed)] == 0)
-	// 		player1.posY -= player1.dirY * moveSpeed;
-	// }
-
-	// if (btn(2)) {
-	// 	var oldDirX = player1.dirX;
-	// 	player1.dirX = player1.dirX * Math.cos(rotSpeed) - player1.dirY * Math.sin(rotSpeed);
-	// 	player1.dirY = oldDirX * Math.sin(rotSpeed) + player1.dirY * Math.cos(rotSpeed);
-	// 	var oldPlaneX = player1.planeX;
-	// 	player1.planeX = player1.planeX * Math.cos(rotSpeed) - player1.planeY * Math.sin(rotSpeed);
-	// 	player1.planeY = oldPlaneX * Math.sin(rotSpeed) + player1.planeY * Math.cos(rotSpeed);
-	// }
-
-	// if (btn(3)) {
-	// 	var oldDirX = player1.dirX;
-	// 	player1.dirX = player1.dirX * Math.cos(-rotSpeed) - player1.dirY * Math.sin(-rotSpeed);
-	// 	player1.dirY = oldDirX * Math.sin(-rotSpeed) + player1.dirY * Math.cos(-rotSpeed);
-	// 	var oldPlaneX = player1.planeX;
-	// 	player1.planeX = player1.planeX * Math.cos(-rotSpeed) - player1.planeY * Math.sin(-rotSpeed);
-	// 	player1.planeY = oldPlaneX * Math.sin(-rotSpeed) + player1.planeY * Math.cos(-rotSpeed);
-	// }
-
 	if (btn(0)) {
+		if (worldMap[Math.trunc(player1.posX + player1.dirX * moveSpeed)][Math.trunc(player1.posY)] == 0)
+			player1.posX += player1.dirX * moveSpeed;
+		if (worldMap[Math.trunc(player1.posX)][Math.trunc(player1.posY + player1.dirY * moveSpeed)] == 0)
+			player1.posY += player1.dirY * moveSpeed;
+	}
+
+	if (btn(1)) {
+		if (worldMap[Math.trunc(player1.posX - player1.dirX * moveSpeed)][Math.trunc(player1.posY)] == 0)
+			player1.posX -= player1.dirX * moveSpeed;
+		if (worldMap[Math.trunc(player1.posX)][Math.trunc(player1.posY - player1.dirY * moveSpeed)] == 0)
+			player1.posY -= player1.dirY * moveSpeed;
+	}
+
+	if (btn(2)) {
+		var oldDirX = player1.dirX;
+		player1.dirX = player1.dirX * Math.cos(rotSpeed) - player1.dirY * Math.sin(rotSpeed);
+		player1.dirY = oldDirX * Math.sin(rotSpeed) + player1.dirY * Math.cos(rotSpeed);
+		var oldPlaneX = player1.planeX;
+		player1.planeX = player1.planeX * Math.cos(rotSpeed) - player1.planeY * Math.sin(rotSpeed);
+		player1.planeY = oldPlaneX * Math.sin(rotSpeed) + player1.planeY * Math.cos(rotSpeed);
+	}
+
+	if (btn(3)) {
+		var oldDirX = player1.dirX;
+		player1.dirX = player1.dirX * Math.cos(-rotSpeed) - player1.dirY * Math.sin(-rotSpeed);
+		player1.dirY = oldDirX * Math.sin(-rotSpeed) + player1.dirY * Math.cos(-rotSpeed);
+		var oldPlaneX = player1.planeX;
+		player1.planeX = player1.planeX * Math.cos(-rotSpeed) - player1.planeY * Math.sin(-rotSpeed);
+		player1.planeY = oldPlaneX * Math.sin(-rotSpeed) + player1.planeY * Math.cos(-rotSpeed);
+	}
+
+	if (btn(1)) {
 		if (worldMap[Math.trunc(player2.posX + player2.dirX * moveSpeed)][Math.trunc(player2.posY)] == 0)
 			player2.posX += player2.dirX * moveSpeed;
 		if (worldMap[Math.trunc(player2.posX)][Math.trunc(player2.posY + player2.dirY * moveSpeed)] == 0)
 			player2.posY += player2.dirY * moveSpeed;
 	}
 
-	if (btn(1)) {
+	if (btn(0)) {
 		if (worldMap[Math.trunc(player2.posX - player2.dirX * moveSpeed)][Math.trunc(player2.posY)] == 0)
 			player2.posX -= player2.dirX * moveSpeed;
 		if (worldMap[Math.trunc(player2.posX)][Math.trunc(player2.posY - player2.dirY * moveSpeed)] == 0)
