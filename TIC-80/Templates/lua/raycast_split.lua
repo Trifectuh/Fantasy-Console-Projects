@@ -58,6 +58,8 @@ p1 = {
 	},
 	moveSpeed = 5,
 	rotationSpeed = 3, 
+	zBuffer = {},
+	spriteOffset = 0,
 	getCameraX = 
 		function (x)
 			return (2 * x) / 120 - 1
@@ -87,9 +89,11 @@ p2 = {
 	},
 	moveSpeed = 5,
 	rotationSpeed = 3,
+	zBuffer = {},
+	spriteOffset = 32,
 	getCameraX = 
 		function (x)
-			return (2 * x - 120) / 120 - 2;
+			return (2 * x - 120) / 120 - 2
 		end,
 }
 
@@ -137,14 +141,13 @@ function TIC()
 	drawBackground()
 
 	drawWorld(p1)
-	drawSprites(p1)
+	drawOpponent(p1, p2)
 
 	drawWorld(p2)
-	drawSprites(p1)
+	drawOpponent(p2, p1)
 
 	updateFpsCounter()
 	movePlayer(p1)
-	movePlayer(p2)
 end
 
 function drawBackground()
@@ -168,13 +171,62 @@ function drawWorld(player)
 		end
 
 		calculateWallDistance(player)
+		updateZBuffer(player, x)
 		calculateColumnHeight()
 		drawColumn(x)
 	end
 end
 
-function drawSprites(player)
-	--draw enemies/bullets/etc
+function drawOpponent(player, opponent)
+	local spriteX = opponent.pos.x - player.pos.x
+	local spriteY = opponent.pos.y - player.pos.y
+
+	local invDet = 1 / (player.cam.x * player.dir.y - player.dir.x * player.cam.y)
+
+	local transformX = 2 * (invDet * (player.dir.y * spriteX - player.dir.x * spriteY))
+	local transformY = invDet * (-player.cam.y * spriteX + player.cam.x * spriteY)
+
+	local spriteScreenX = math.floor((120 / 2) * (1 + transformX / transformY))
+
+	local spriteHeight = math.abs(math.floor(136 / transformY) * 0.75)
+	local drawStartY = -spriteHeight / 2 + 136 / 2 + spriteHeight / 4
+	local yOffset = 0
+
+	if (drawStartY < 0) then
+		yOffset = math.abs(drawStartY)
+		drawStartY = 0
+	end
+
+	local drawEndY = spriteHeight / 2 + 136 / 2 + spriteHeight / 4
+	if (drawEndY >= 136) then drawEndY = 136 end
+
+	local spriteWidth = math.abs(math.floor(136 / transformY) * 0.75)
+	local drawStartX = math.floor(0.5 * (-spriteWidth + spriteScreenX)) + 30
+	local xOffset = 0
+
+	if (drawStartX < player.screen.xStart) then
+		xOffset = math.abs(drawStartX)
+		drawStartX = player.screen.xStart
+	end
+
+	local drawEndX = math.floor(0.5 * (spriteWidth + spriteScreenX)) + 30
+	if (drawEndX >= player.screen.xEnd) then drawEndX = player.screen.xEnd end
+
+	for stripe = drawStartX, drawEndX-1, 1 do
+		local texX = math.floor((32 * (stripe - drawStartX + xOffset)) / spriteWidth) + opponent.spriteOffset
+		if (transformY > player.screen.xStart and stripe >= player.screen.xStart and stripe <= player.screen.xEnd and transformY < player.zBuffer[stripe]) then
+			for y = drawStartY, drawEndY-1, 1 do
+				local texY = math.floor((32 * (y - drawStartY + yOffset)) / spriteHeight);
+				local color = sget(texX, texY);
+				if (color ~= 15) then pix(stripe, y, color); end
+			end
+		end
+	end
+end
+
+function sget(x,y)
+	local addr=0x4000+(x//8+y//8*16)*32 -- get sprite address
+	return peek4(addr*2+x%8+y%8*8) -- get sprite pixel
 end
 
 function createRay(x, player)
@@ -238,6 +290,10 @@ function calculateWallDistance(player)
 	else
 		ray.dist.perp = (ray.mapPos.y - player.pos.y + (1 - ray.step.y) / 2) / ray.dir.y
 	end
+end
+
+function updateZBuffer(player, x)
+	player.zBuffer[x] = ray.dist.perp
 end
 
 function calculateColumnHeight()
