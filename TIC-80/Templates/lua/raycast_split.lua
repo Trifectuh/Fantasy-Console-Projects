@@ -57,12 +57,16 @@ p1 = {
 		xEnd = 119
 	},
 	moveSpeed = 5,
-	rotationSpeed = 3
+	rotationSpeed = 3, 
+	getCameraX = 
+		function (x)
+			return (2 * x) / 120 - 1
+		end,
 }
 
 p2 = {
 	pos = {
-		x = 21,
+		x = 15,
 		y = 11
 	},
 	dir = {
@@ -82,7 +86,11 @@ p2 = {
 		xEnd = 240
 	},
 	moveSpeed = 5,
-	rotationSpeed = 3
+	rotationSpeed = 3,
+	getCameraX = 
+		function (x)
+			return (2 * x - 120) / 120 - 2;
+		end,
 }
 
 timer = {
@@ -129,13 +137,15 @@ function TIC()
 	drawBackground()
 
 	drawWorld(p1)
+	drawWorld(p2)
 
 	updateFpsCounter()
 	movePlayer(p1)
+	movePlayer(p2)
 end
 
 function drawWorld(player)
-	for x = player.xStart, player.xEnd, 1 do
+	for x = player.screen.xStart, player.screen.xEnd, 1 do
 		createRay(x, player)
 
 		setPlayerMapPosition(player)
@@ -157,10 +167,11 @@ end
 function drawBackground()
 	rect(0, 0, 240, 68, 13)
 	rect(0, 69, 240, 136, 12)
+	line(120, 0, 120, 136, 0)
 end
 
 function createRay(x, player)
-	local cameraX = (2 * x) / screen.width - 1
+	local cameraX = player.getCameraX(x)
 	ray.dir.x = player.dir.x + player.cam.x * cameraX
 	ray.dir.y = player.dir.y + player.cam.y * cameraX
 end
