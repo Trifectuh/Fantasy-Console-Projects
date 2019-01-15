@@ -137,11 +137,20 @@ function TIC()
 	drawBackground()
 
 	drawWorld(p1)
+	drawSprites(p1)
+
 	drawWorld(p2)
+	drawSprites(p1)
 
 	updateFpsCounter()
 	movePlayer(p1)
 	movePlayer(p2)
+end
+
+function drawBackground()
+	rect(0, 0, 240, 68, 13)
+	rect(0, 69, 240, 136, 12)
+	line(120, 0, 120, 136, 0)
 end
 
 function drawWorld(player)
@@ -164,10 +173,8 @@ function drawWorld(player)
 	end
 end
 
-function drawBackground()
-	rect(0, 0, 240, 68, 13)
-	rect(0, 69, 240, 136, 12)
-	line(120, 0, 120, 136, 0)
+function drawSprites(player)
+	--draw enemies/bullets/etc
 end
 
 function createRay(x, player)
