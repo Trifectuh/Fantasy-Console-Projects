@@ -9,52 +9,53 @@ screen = {
 }
 
 worldMap = {
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 4, 0, 0, 0, 0, 5, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 4, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+	{2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2},
+	{2, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{2, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2},
+	{2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2},
+	{2, 0, 0, 2, 2, 2, 0, 0, 2, 0, 0, 2, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2},
+	{2, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2},
+	{2, 0, 2, 0, 0, 2, 0, 2, 2, 0, 0, 2, 2, 2, 2, 0, 2, 0, 0, 0, 2, 0, 0, 2},
+	{2, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2},
+	{2, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2},
+	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2},
+	{2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1},
+	{1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	{1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1},
+	{1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1},
+	{1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1},
+	{1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+	{1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1},
+	{1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 }
 
 p1 = {
 	pos = {
-		x = 22,
-		y = 11
+		x = 2.5,
+		y = 2.5
 	},
 	dir = {
-		x = -1,
-		y = 0
+		x = 0,
+		y = 1
 	},
 	cam = {
-		x = 0,
-		y = 0.66
+		x = 0.66,
+		y = 0.06
 	},
 	mapPos = {
-		x = 22,
-		y = 11
+		x = 2,
+		y = 2
 	},
 	screen = {
 		xStart = 0,
-		xEnd = 119
+		xEnd = 119,
+		xAdditive = -30
 	},
 	moveSpeed = 5,
 	rotationSpeed = 3, 
@@ -68,24 +69,25 @@ p1 = {
 
 p2 = {
 	pos = {
-		x = 15,
-		y = 11
+		x = 23.5,
+		y = 23.5
 	},
 	dir = {
-		x = -1,
-		y = 0
+		x = 0,
+		y = -1
 	},
 	cam = {
-		x = 0,
-		y = 0.66
+		x = -0.66,
+		y = 0
 	},
 	mapPos = {
-		x = 22,
-		y = 11
+		x = 23,
+		y = 23
 	},
 	screen = {
 		xStart = 121,
-		xEnd = 240
+		xEnd = 240,
+		xAdditive = 30
 	},
 	moveSpeed = 5,
 	rotationSpeed = 3,
@@ -147,7 +149,9 @@ function TIC()
 	drawOpponent(p2, p1)
 
 	updateFpsCounter()
+
 	movePlayer(p1)
+	movePlayer(p2)
 end
 
 function drawBackground()
@@ -186,7 +190,7 @@ function drawOpponent(player, opponent)
 	local transformX = 2 * (invDet * (player.dir.y * spriteX - player.dir.x * spriteY))
 	local transformY = invDet * (-player.cam.y * spriteX + player.cam.x * spriteY)
 
-	local spriteScreenX = math.floor((120 / 2) * (1 + transformX / transformY))
+	local spriteScreenX = player.screen.xStart + math.floor((120 / 2) * (1 + transformX / transformY))
 
 	local spriteHeight = math.abs(math.floor(136 / transformY) * 0.75)
 	local drawStartY = -spriteHeight / 2 + 136 / 2 + spriteHeight / 4
@@ -201,20 +205,21 @@ function drawOpponent(player, opponent)
 	if (drawEndY >= 136) then drawEndY = 136 end
 
 	local spriteWidth = math.abs(math.floor(136 / transformY) * 0.75)
-	local drawStartX = math.floor(0.5 * (-spriteWidth + spriteScreenX)) + 30
+	local drawStartX = player.screen.xStart + math.floor(0.5 * (-spriteWidth + spriteScreenX)) + opponent.screen.xAdditive
 	local xOffset = 0
 
 	if (drawStartX < player.screen.xStart) then
-		xOffset = math.abs(drawStartX)
+		xOffset = math.abs(drawStartX - player.screen.xStart)
+		trace(xOffset)
 		drawStartX = player.screen.xStart
 	end
 
-	local drawEndX = math.floor(0.5 * (spriteWidth + spriteScreenX)) + 30
+	local drawEndX = player.screen.xStart + math.floor(0.5 * (spriteWidth + spriteScreenX)) + opponent.screen.xAdditive
 	if (drawEndX >= player.screen.xEnd) then drawEndX = player.screen.xEnd end
 
 	for stripe = drawStartX, drawEndX-1, 1 do
 		local texX = math.floor((32 * (stripe - drawStartX + xOffset)) / spriteWidth) + opponent.spriteOffset
-		if (transformY > player.screen.xStart and stripe >= player.screen.xStart and stripe <= player.screen.xEnd and transformY < player.zBuffer[stripe]) then
+		if (transformY > 0 and stripe >= player.screen.xStart and stripe <= player.screen.xEnd and transformY < player.zBuffer[stripe]) then
 			for y = drawStartY, drawEndY-1, 1 do
 				local texY = math.floor((32 * (y - drawStartY + yOffset)) / spriteHeight);
 				local color = sget(texX, texY);
@@ -372,36 +377,36 @@ end
 
 -- <TILES>
 -- 000:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
--- 001:fffff228ffff2222ffff277affff2777ffff2222ffff2222fffff212fff22112
+-- 001:fffff228ffff2222ffff255affff2555ffff2222ffff2222fffff212fff22112
 -- 002:888fffff2288ffffaaa8ffffaaa8ffff2888ffff2222ffff288fffff288888ff
 -- 003:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 -- 004:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
--- 005:fffff66cffff6666ffff677affff6777ffff6666ffff6666fffff616fff66116
+-- 005:fffff66cffff6666ffff655affff6555ffff6666ffff6666fffff616fff66116
 -- 006:cccfffff66ccffffaaacffffaaacffff6cccffff6666ffff6ccfffff6cccccff
 -- 007:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 -- 016:fffffffffffffffffffffffffffffffffffffff2fffffff2fffffff2fffffff2
--- 017:ff222222f22222222222222222228222222882222288222222282222767a2222
+-- 017:ff222222f22222222222222222228222222882222288222222282222565a2222
 -- 018:2822288f22222288222222282221222822212222222212222222812222228122
 -- 019:ffffffffffffffffffffffff8fffffff8fffffff8fffffff8fffffff8fffffff
 -- 020:fffffffffffffffffffffffffffffffffffffff6fffffff6fffffff6fffffff6
--- 021:ff666666f6666666666666666666c666666cc66666cc6666666c66667b7a6666
+-- 021:ff666666f6666666666666666666c666666cc66666cc6666666c66665b5a6666
 -- 022:6c666ccf666666cc6666666c6661666c66616666666616666666c1666666c166
 -- 023:ffffffffffffffffffffffffcfffffffcfffffffcfffffffcfffffffcfffffff
 -- 032:fffffff3fffffff3ffffffffffffffffffffffffffffffffffffffffffffffff
--- 033:7767a33637003a363000072233003322f3333222fff22221fff22221fff22221
--- 034:6777a1226777a1182222811822228813222228332222283f2222283f222228ff
--- 035:ffffffffffffffff7fffffff7fffffff7fffffffffffffffffffffffffffffff
+-- 033:5565a55635003a563000052233003322f3333222fff22221fff22221fff22221
+-- 034:6555a1226555a1182222811822228813222228332222283f2222283f222228ff
+-- 035:ffffffffffffffff5fffffff5fffffff5fffffffffffffffffffffffffffffff
 -- 036:fffffff3fffffff3ffffffffffffffffffffffffffffffffffffffffffffffff
--- 037:77b7a33237003a323000076633003366f3333666fff66661fff66661fff66661
--- 038:2777a1662777a11c6666c11c6666cc1366666c3366666c3f66666c3f66666cff
+-- 037:55b5a55235003a523000056633003366f3333666fff66661fff66661fff66661
+-- 038:2555a1662555a11c6666c11c6666cc1366666c3366666c3f66666c3f66666cff
 -- 039:ffffffffffffffff7fffffff7fffffff7fffffffffffffffffffffffffffffff
 -- 048:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
--- 049:fff22211ffff2211ffff2211fffff221fffff221fffff731ffff7731ffff7331
--- 050:222228ff122288ff12228fff12228fff22228fff17aaffff77aaafff7333afff
+-- 049:fff22211ffff2211ffff2211fffff221fffff221fffff531ffff5531ffff5331
+-- 050:222228ff122288ff12228fff12228fff22228fff15aaffff55aaafff5333afff
 -- 051:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 -- 052:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
--- 053:fff66611ffff6611ffff6611fffff661fffff661fffff731ffff7731ffff7331
--- 054:66666cff1666ccff1666cfff1666cfff6666cfff17aaffff77aaafff7333afff
+-- 053:fff66611ffff6611ffff6611fffff661fffff661fffff531ffff5531ffff5331
+-- 054:66666cff1666ccff1666cfff1666cfff6666cfff15aaffff55aaafff5333afff
 -- 055:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 -- </TILES>
 
@@ -451,5 +456,6 @@ end
 -- </SFX>
 
 -- <PALETTE>
--- 000:140c1c44243430346d4e4a4e854c30346524d04648757161597dced27d2c8595a16daa2cd2aa99a1c2e6343434deeed6
+-- 000:140c1c44243430346d595959854c30403c40d046484050b2597dced27d2c8585856daa2cd2aa99a1c2e6343434deeed6
 -- </PALETTE>
+
