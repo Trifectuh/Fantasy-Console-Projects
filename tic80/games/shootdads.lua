@@ -161,7 +161,8 @@ function drawBackground()
 end
 
 function drawWorld(player)
-	for x = player.screen.xStart, player.screen.xEnd, 1 do
+	for x = player.screen.xStart, 
+			player.screen.xEnd, 1 do
 		createRay(x, player)
 
 		setPlayerMapPosition(player)
@@ -182,18 +183,35 @@ function drawWorld(player)
 end
 
 function drawOpponent(player, opponent)
-	local spriteX = opponent.pos.x - player.pos.x
-	local spriteY = opponent.pos.y - player.pos.y
+	local spriteX = opponent.pos.x - 
+		player.pos.x
+	
+	local spriteY = opponent.pos.y - 
+		player.pos.y
 
-	local invDet = 1 / (player.cam.x * player.dir.y - player.dir.x * player.cam.y)
+	local invDet = 1 / 
+		(player.cam.x * player.dir.y - 
+			player.dir.x * player.cam.y)
 
-	local transformX = 2 * (invDet * (player.dir.y * spriteX - player.dir.x * spriteY))
-	local transformY = invDet * (-player.cam.y * spriteX + player.cam.x * spriteY)
+	local transformX = 2 * (invDet * 
+		(player.dir.y * spriteX - 
+				player.dir.x * spriteY))
+	
+	local transformY = invDet * 
+		(-player.cam.y * spriteX + 
+				player.cam.x * spriteY)
 
-	local spriteScreenX = player.screen.xStart + math.floor((120 / 2) * (1 + transformX / transformY))
+	local spriteScreenX = 
+		player.screen.xStart + 
+			math.floor((120 / 2) * 
+				(1 + transformX / transformY))
 
-	local spriteHeight = math.abs(math.floor(136 / transformY) * 0.75)
-	local drawStartY = -spriteHeight / 2 + 136 / 2 + spriteHeight / 4
+	local spriteHeight = math.abs(
+		math.floor(136 / transformY) * 0.75)
+	
+	local drawStartY = -spriteHeight / 2 
+		+ 136 / 2 + spriteHeight / 4
+	
 	local yOffset = 0
 
 	if (drawStartY < 0) then
@@ -201,53 +219,94 @@ function drawOpponent(player, opponent)
 		drawStartY = 0
 	end
 
-	local drawEndY = spriteHeight / 2 + 136 / 2 + spriteHeight / 4
-	if (drawEndY >= 136) then drawEndY = 136 end
+	local drawEndY = spriteHeight / 2 
+		+ 136 / 2 + spriteHeight / 4
+	
+	if (drawEndY >= 136) then 
+		drawEndY = 136 
+	end
 
-	local spriteWidth = math.abs(math.floor(136 / transformY) * 0.75)
-	local drawStartX = player.screen.xStart + math.floor(0.5 * (-spriteWidth + spriteScreenX)) + opponent.screen.xAdditive
+	local spriteWidth = math.abs(
+		math.floor(136 / transformY) * 0.75)
+	
+	local drawStartX = 
+		player.screen.xStart + 
+			math.floor(0.5 * (-spriteWidth + 
+				spriteScreenX)) + 
+					opponent.screen.xAdditive
+	
 	local xOffset = 0
 
-	if (drawStartX < player.screen.xStart) then
-		xOffset = math.abs(drawStartX - player.screen.xStart)
-		trace(xOffset)
+	if (drawStartX < player.screen.xStart) 
+	then
+		xOffset = math.abs(
+			drawStartX - player.screen.xStart)
 		drawStartX = player.screen.xStart
 	end
 
-	local drawEndX = player.screen.xStart + math.floor(0.5 * (spriteWidth + spriteScreenX)) + opponent.screen.xAdditive
-	if (drawEndX >= player.screen.xEnd) then drawEndX = player.screen.xEnd end
+	local drawEndX = player.screen.xStart +
+	 math.floor(0.5 * 
+			(spriteWidth + spriteScreenX)) +
+			 opponent.screen.xAdditive
+	
+	if (drawEndX >= player.screen.xEnd) 
+	then 
+		drawEndX = player.screen.xEnd 
+ end
 
-	for stripe = drawStartX, drawEndX-1, 1 do
-		local texX = math.floor((32 * (stripe - drawStartX + xOffset)) / spriteWidth) + opponent.spriteOffset
-		if (transformY > 0 and stripe >= player.screen.xStart and stripe <= player.screen.xEnd and transformY < player.zBuffer[stripe]) then
-			for y = drawStartY, drawEndY-1, 1 do
-				local texY = math.floor((32 * (y - drawStartY + yOffset)) / spriteHeight);
+	for stripe = drawStartX, drawEndX-1, 1 
+	do
+		local texX = math.floor((32 * (
+			stripe - drawStartX + xOffset)) / 
+				spriteWidth) + 
+					opponent.spriteOffset
+		
+		if (transformY > 0 and 
+			stripe >= player.screen.xStart and 
+			stripe <= player.screen.xEnd and 
+			transformY < player.zBuffer[stripe]) 
+		then
+			for y = drawStartY, drawEndY-1, 1 
+			do
+				local texY = math.floor((32 * 
+					(y - drawStartY + yOffset)) / 
+						spriteHeight);
+				
 				local color = sget(texX, texY);
-				if (color ~= 15) then pix(stripe, y, color); end
+				
+				if (color ~= 15) then 
+					pix(stripe, y, color); 
+				end
 			end
 		end
 	end
 end
 
 function sget(x,y)
-	local addr=0x4000+(x//8+y//8*16)*32 -- get sprite address
-	return peek4(addr*2+x%8+y%8*8) -- get sprite pixel
+	local addr=0x4000+(x//8+y//8*16)*32
+	return peek4(addr*2+x%8+y%8*8)
 end
 
 function createRay(x, player)
 	local cameraX = player.getCameraX(x)
-	ray.dir.x = player.dir.x + player.cam.x * cameraX
-	ray.dir.y = player.dir.y + player.cam.y * cameraX
+	ray.dir.x = 
+		player.dir.x + player.cam.x * cameraX
+	ray.dir.y = 
+		player.dir.y + player.cam.y * cameraX
 end
 
 function setPlayerMapPosition(player)
-	player.mapPos.x = math.floor(player.pos.x)
-	player.mapPos.y = math.floor(player.pos.y)
+	player.mapPos.x = 
+		math.floor(player.pos.x)
+	player.mapPos.y = 
+		math.floor(player.pos.y)
 end
 
 function setRayMapPosition(player)
-	ray.mapPos.x = math.floor(player.pos.x)
-	ray.mapPos.y = math.floor(player.pos.y)
+	ray.mapPos.x = 
+	math.floor(player.pos.x)
+	ray.mapPos.y = 
+	math.floor(player.pos.y)
 end
 
 function calculateRayDistance()
@@ -258,32 +317,46 @@ end
 function calculateRayStepSize(player)
 	if (ray.dir.x < 0) then
 		ray.step.x = -1
-		ray.dist.x = (player.pos.x - player.mapPos.x) * ray.dist.dx
+		ray.dist.x = 
+			(player.pos.x - player.mapPos.x) * 
+					ray.dist.dx
 	else
 		ray.step.x = 1
-		ray.dist.x = (player.mapPos.x + 1.0 - player.pos.x) * ray.dist.dx
+		ray.dist.x = 
+			(player.mapPos.x + 1.0 - 
+				player.pos.x) * ray.dist.dx
 	end
+	
 	if (ray.dir.y < 0) then
 		ray.step.y = -1
-		ray.dist.y = (player.pos.y - player.mapPos.y) * ray.dist.dy
+		ray.dist.y = 
+		(player.pos.y - player.mapPos.y) * 
+				ray.dist.dy
 	else
 		ray.step.y = 1
-		ray.dist.y = (player.mapPos.y + 1.0 - player.pos.y) * ray.dist.dy
+		ray.dist.y = 
+			(player.mapPos.y + 1.0 - 
+					player.pos.y) * ray.dist.dy
 	end
 end
 
 function findWall()
 	if (ray.dist.x < ray.dist.y) then
 		ray.dist.x = ray.dist.x + ray.dist.dx
-		ray.mapPos.x = ray.mapPos.x + ray.step.x
+		ray.mapPos.x = 
+			ray.mapPos.x + ray.step.x
 		ray.wall.side = 0
 	else
 		ray.dist.y = ray.dist.y + ray.dist.dy
-		ray.mapPos.y = ray.mapPos.y + ray.step.y
+		ray.mapPos.y = 
+			ray.mapPos.y + ray.step.y
 		ray.wall.side = 1
 	end
 
-	if (worldMap[ray.mapPos.x][ray.mapPos.y] > 0) then
+	if 
+	 (worldMap[ray.mapPos.x][ray.mapPos.y]
+		 > 0) 
+	then
 		ray.wall.hit = true
 		return
 	end
@@ -291,9 +364,13 @@ end
 
 function calculateWallDistance(player)
 	if (ray.wall.side == 0) then
-		ray.dist.perp = (ray.mapPos.x - player.pos.x + (1 - ray.step.x) / 2) / ray.dir.x
+		ray.dist.perp = 
+			(ray.mapPos.x - player.pos.x + 
+				(1 - ray.step.x) / 2) / ray.dir.x
 	else
-		ray.dist.perp = (ray.mapPos.y - player.pos.y + (1 - ray.step.y) / 2) / ray.dir.y
+		ray.dist.perp = 
+			(ray.mapPos.y - player.pos.y + 
+				(1 - ray.step.y) / 2) / ray.dir.y
 	end
 end
 
@@ -302,76 +379,149 @@ function updateZBuffer(player, x)
 end
 
 function calculateColumnHeight()
-	column.height = screen.height / ray.dist.perp
-
-	column.top = -column.height / 2 + screen.height / 2
+	column.height = 
+		screen.height / ray.dist.perp
+	column.top = 
+		-column.height / 2 +
+		 screen.height / 2
+	
 	if (column.top < 0) then
 		column.top = 0
 	end
 
-	column.bottom = column.height / 2 + screen.height / 2
-	if (column.bottom >= screen.height) then
+	column.bottom = 
+		column.height / 2 + 
+			screen.height / 2
+	
+	if (column.bottom >= screen.height) 
+	then
 		column.bottom = screen.height - 1
 	end
 end
 
 function drawColumn(x)
-	column.color = worldMap[ray.mapPos.x][ray.mapPos.y]
+	column.color = 
+	worldMap[ray.mapPos.x][ray.mapPos.y]
 
 	if (ray.wall.side == 1) then
 		column.color = column.color + 5
 	end
 
-	line(x, column.top, x, column.bottom, column.color)
+	line(x, 
+						column.top, 
+						x, 
+						column.bottom, 
+						column.color)
 end
 
 function updateFpsCounter()
 	timer.old = timer.current
 	timer.current = time()
-	timer.lastFrame = (timer.current - timer.old) / 1000.0
-	print(math.floor(1.0 / timer.lastFrame))
+	timer.lastFrame = 
+		(timer.current - timer.old) / 1000.0
+	print(math.floor(1.0 / 
+		timer.lastFrame))
 end
 
 function movePlayer(player)
 	local moveSpeedDelta = timer.lastFrame * player.moveSpeed
-	local rotationSpeedDelta = timer.lastFrame * player.rotationSpeed
+	local rotationSpeedDelta = 
+		timer.lastFrame * 
+			player.rotationSpeed
 
 	if (btn(0)) then
-		if (worldMap[math.floor(player.pos.x + player.dir.x * moveSpeedDelta)][math.floor(player.pos.y)] == 0) then
-			player.pos.x = player.pos.x + (player.dir.x * moveSpeedDelta)
+		if (worldMap[math.floor(
+			player.pos.x + player.dir.x * 
+				moveSpeedDelta)]
+					[math.floor(
+						player.pos.y)] == 0) 
+		then
+			player.pos.x = 
+				player.pos.x + 
+					(player.dir.x * moveSpeedDelta)
 		end
-		if (worldMap[math.floor(player.pos.x)][math.floor(player.pos.y + player.dir.y * moveSpeedDelta)] == 0) then
-			player.pos.y = player.pos.y + (player.dir.y * moveSpeedDelta)
+		
+		if (worldMap[math.floor(
+			player.pos.x)]
+				[math.floor(
+					player.pos.y + player.dir.y * 
+						moveSpeedDelta)] == 0) 
+		then
+			player.pos.y = 
+				player.pos.y + (
+					player.dir.y * moveSpeedDelta)
 		end
 	end
 
 	if (btn(1)) then
-		if (worldMap[math.floor(player.pos.x - player.dir.x * moveSpeedDelta)][math.floor(player.pos.y)] == 0) then
-			player.pos.x = player.pos.x - (player.dir.x * moveSpeedDelta)
+		if (worldMap[math.floor(
+			player.pos.x - player.dir.x * 
+				moveSpeedDelta)]
+					[math.floor(player.pos.y)] == 0) 
+		then
+			player.pos.x = 
+				player.pos.x - (
+					player.dir.x * moveSpeedDelta)
 		end
-		if (worldMap[math.floor(player.pos.x)][math.floor(player.pos.y - player.dir.y * moveSpeedDelta)] == 0) then
-			player.pos.y = player.pos.y - (player.dir.y * moveSpeedDelta)
+		
+		if (worldMap[math.floor(
+		 player.pos.x)][math.floor(
+			 player.pos.y - player.dir.y * 
+				 moveSpeedDelta)] == 0) 
+	 then
+			player.pos.y = 
+				player.pos.y - (
+					player.dir.y * moveSpeedDelta)
 		end
 	end
 
 	if (btn(2)) then
 		local oldDirX = player.dir.x
-		player.dir.x = player.dir.x * math.cos(rotationSpeedDelta) - player.dir.y * math.sin(rotationSpeedDelta)
-		player.dir.y = oldDirX * math.sin(rotationSpeedDelta) + player.dir.y * math.cos(rotationSpeedDelta)
+		 player.dir.x = 
+			 player.dir.x * math.cos(
+				 rotationSpeedDelta) - player.dir.y *
+			 	 math.sin(rotationSpeedDelta)
+		
+		player.dir.y = 
+			oldDirX * math.sin(
+				rotationSpeedDelta) + 
+					player.dir.y * math.cos(
+						rotationSpeedDelta)
 
 		local oldPlaneX = player.cam.x
-		player.cam.x = player.cam.x * math.cos(rotationSpeedDelta) - player.cam.y * math.sin(rotationSpeedDelta)
-		player.cam.y = oldPlaneX * math.sin(rotationSpeedDelta) + player.cam.y * math.cos(rotationSpeedDelta)
+		player.cam.x = 
+			player.cam.x * math.cos(
+				rotationSpeedDelta) - 
+					player.cam.y * math.sin(
+						rotationSpeedDelta)
+		
+		player.cam.y = oldPlaneX * math.sin(
+			rotationSpeedDelta) + player.cam.y *
+			 math.cos(rotationSpeedDelta)
 	end
 
 	if (btn(3)) then
 		local oldDirX = player.dir.x
-		player.dir.x = player.dir.x * math.cos(-rotationSpeedDelta) - player.dir.y * math.sin(-rotationSpeedDelta)
-		player.dir.y = oldDirX * math.sin(-rotationSpeedDelta) + player.dir.y * math.cos(-rotationSpeedDelta)
+		player.dir.x = 
+			player.dir.x * math.cos(
+				-rotationSpeedDelta) - 
+						player.dir.y * math.sin(
+							-rotationSpeedDelta)
+		player.dir.y = oldDirX * math.sin(
+			-rotationSpeedDelta) + 
+					player.dir.y * math.cos(
+						-rotationSpeedDelta)
 
 		local oldPlaneX = player.cam.x
-		player.cam.x = player.cam.x * math.cos(-rotationSpeedDelta) - player.cam.y * math.sin(-rotationSpeedDelta)
-		player.cam.y = oldPlaneX * math.sin(-rotationSpeedDelta) + player.cam.y * math.cos(-rotationSpeedDelta)
+		player.cam.x = 
+			player.cam.x * math.cos(
+				-rotationSpeedDelta) - 
+					player.cam.y * math.sin(
+						-rotationSpeedDelta)
+		player.cam.y = oldPlaneX * math.sin(
+			-rotationSpeedDelta) + 
+				player.cam.y * math.cos(
+					-rotationSpeedDelta)
 	end
 end
 
