@@ -19,29 +19,22 @@ function char_update(c)
   fb_hitcalc()
   -- get currently pressed dpad direction
   char_updatedir(c)
- 
-  -- slide if we get hit by something
-  if char_shouldknock(c) then c.upd=char_knock currentFunc='knock' end
-  -- walk if we should walk
- if char_shouldwalk(c) then
-   currentFunc='walk'
-   if btn(0, ctrl) then char_walk(c,0) end
-   if btn(1, ctrl) then char_walk(c,1) end
-   if btn(2, ctrl) then char_walk(c,2) end
-   if btn(3, ctrl) then char_walk(c,3) end
-   if c.dx~=0 or c.dy~=0 then
-    char_walkanim(c)
-   end
-  end
-  -- dash if we should dash (broken)
- if char_shoulddash(c) then c.upd=char_dash currentFunc='dash' end
-   -- check if we should halt
- if char_shouldhalt(c) then c.upd=char_halt currentFunc='halt' end
-   --check if we should fall
- if char_shouldfall(c) then c.upd=char_fall currentFunc='fall' end
+
  -- update attacks
- if char_shouldattack(c) then c.upd=char_attack currentFunc='atk' end 
-end
+  if char_shouldattack(c) then c.upd=char_attack currentFunc='atk' 
+  -- slide if we get hit by something
+  elseif char_shouldknock(c) then c.upd=char_knock currentFunc='knock' 
+  -- walk if we should walk
+  elseif char_shouldwalk(c) then c.upd=char_move currentFunc='walk'
+  -- dash if we should dash (broken)
+  elseif char_shoulddash(c) then c.upd=char_dash currentFunc='dash' 
+  -- check if we should halt
+  elseif char_shouldhalt(c) then c.upd=char_halt currentFunc='halt' 
+  --check if we should fall
+  elseif char_shouldfall(c) then c.upd=char_fall currentFunc='fall' 
+  
+  else char_idle(c) end
+ end
  --do the thing we decided to do
  c.upd(c)
  c.x+=c.dx
@@ -156,6 +149,7 @@ function char_updateinputbuffer(c)
 end
 
 function char_shouldattack(c)
+  if btn(4, ctrl) or btn(5, ctrl) then
   if c.framecounter>0 then
   c.framecounter-=1
   return false
@@ -164,6 +158,7 @@ function char_shouldattack(c)
   c.status.projectile=false
   return true
  end
+end
 end 
 
 function char_attack(c)
@@ -361,6 +356,16 @@ function char_backstep(c,d)
  elseif op.x>c.x and op.x-c.x>9 then 
   c.x-=d 
   c.y-=c.ydir/4
+ end
+end
+
+function char_move(c)
+ if btn(0, ctrl) then char_walk(c,0) end
+ if btn(1, ctrl) then char_walk(c,1) end
+ if btn(2, ctrl) then char_walk(c,2) end
+ if btn(3, ctrl) then char_walk(c,3) end
+ if c.dx~=0 or c.dy~=0 then
+  char_walkanim(c)
  end
 end
 
