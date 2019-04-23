@@ -27,9 +27,11 @@ function char_update(c)
   if btn(1, ctrl) then c.upd=char_walk(c,1) end
   if btn(2, ctrl) then c.upd=char_walk(c,2) end
   if btn(3, ctrl) then c.upd=char_walk(c,3) end
+  char_walkanim(c)
  end
- -- dash if we should dash
- if char_shoulddash(c) then c.upd=char_dash end
+ -- dash if we should dash (broken)
+ -- if char_shoulddash(c) then c.upd=char_dash end
+
  -- update attacks
  if char_shouldattack(c) then c.upd=char_attack end
  -- check if we should halt
@@ -39,6 +41,8 @@ function char_update(c)
   
  --do the thing we decided to do
  c.upd(c)
+ c.x+=c.dx
+ c.y+=c.dy
 end
 
 function char_shouldknock(c)
@@ -74,6 +78,7 @@ function char_updatedir(c)
 end
 
 function char_shoulddash(c)
+ local dist=1
  local l local r local u local d
   if c==p[1] then
    l=0 r=1 u=2 d=3
@@ -127,7 +132,8 @@ function char_dash(c)
    c.y+=c.dy end
   if c.status.dashframe[2]=='v' then
    c.dy=c.status.dashframe[1]
-   c.y+=c.dy end
+   c.y+=c.dy 
+  end
   c.status.dashframe[1]-=0.05
  end
 end
@@ -144,6 +150,7 @@ function char_shouldattack(c)
   c.activemove=0 
   c.status.projectile=false
   return true
+ end
 end 
 
 function char_attack(c)
@@ -162,7 +169,7 @@ function char_shouldhalt(c)
  else return false end
 end
 
-function char_halt(C)
+function char_halt(c)
  c.halt=true
 end
 
@@ -374,10 +381,6 @@ function char_walk(c,d)
    else c.dy=0.25 c.walk=true end
   end
  end
-
- char_walkanim(c)
- c.x+=c.dx
- c.y+=c.dy
 end
 
 function char_updatewalldist(c)

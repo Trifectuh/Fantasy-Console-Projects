@@ -2,16 +2,18 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 
-function title_update
- if keys:up(4) or keys:up(12)then
+titleoffset=-32
+
+function title_update()
+ keys:update()
+ if keys:up(4) or keys:up(12) then
   game.upd=game_update
   game.draw=game_draw
  end
 end
 
-function title_draw
+function title_draw()
  cls()
- titleoffset=-32
  _drawtitle(titleoffset)
  initoffset=titleoffset
  titleoffset+=1

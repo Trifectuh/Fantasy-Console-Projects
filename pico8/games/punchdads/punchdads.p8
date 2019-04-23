@@ -11,10 +11,7 @@ __lua__
 #include attack.p8
 #include char.p8
 
-game={
- upd,
- draw
-}
+game={}
 
 function _init()
   cameraoffset=0
@@ -127,7 +124,7 @@ function game_update()
    char_update(c)
   end
 
-  for f in all(fb) 
+  for f in all(fb) do
    f.x+=f.dx
    f.y+=f.dy
   end
