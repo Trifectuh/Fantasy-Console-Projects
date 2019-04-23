@@ -3,42 +3,45 @@ version 16
 __lua__
 
 function char_update(c)
- -- get current controller
- local ctrl=c.id-1
- -- stop movement from last frame
- c.dx=0 c.dy=0
-  -- reset status
- c.halt=false
-
- -- update the input buffer
- char_updateinputbuffer(c)
- --face the correct direction
- char_face(c)
- -- check if fireballs hit us - move this elsewhere idiot!
- fb_hitcalc()
- -- get currently pressed dpad direction
- char_updatedir(c)
-
- -- slide if we get hit by something
- if char_shouldknock(c) then c.upd=char_knock end
- -- walk if we should walk
+ if c.shouldact then
+  -- get current controller
+  ctrl=c.id-1
+  -- stop movement from last frame
+  c.dx=0 c.dy=0
+   -- reset status
+  c.halt=false
+ 
+  -- update the input buffer
+  char_updateinputbuffer(c)
+  --face the correct direction
+  char_face(c)
+  -- check if fireballs hit us - move this elsewhere idiot!
+  fb_hitcalc()
+  -- get currently pressed dpad direction
+  char_updatedir(c)
+ 
+  -- slide if we get hit by something
+  if char_shouldknock(c) then c.upd=char_knock currentFunc='knock' end
+  -- walk if we should walk
  if char_shouldwalk(c) then
-  if btn(0, ctrl) then c.upd=char_walk(c,0) end
-  if btn(1, ctrl) then c.upd=char_walk(c,1) end
-  if btn(2, ctrl) then c.upd=char_walk(c,2) end
-  if btn(3, ctrl) then c.upd=char_walk(c,3) end
-  char_walkanim(c)
- end
- -- dash if we should dash (broken)
- -- if char_shoulddash(c) then c.upd=char_dash end
-
+   currentFunc='walk'
+   if btn(0, ctrl) then char_walk(c,0) end
+   if btn(1, ctrl) then char_walk(c,1) end
+   if btn(2, ctrl) then char_walk(c,2) end
+   if btn(3, ctrl) then char_walk(c,3) end
+   if c.dx~=0 or c.dy~=0 then
+    char_walkanim(c)
+   end
+  end
+  -- dash if we should dash (broken)
+ if char_shoulddash(c) then c.upd=char_dash currentFunc='dash' end
+   -- check if we should halt
+ if char_shouldhalt(c) then c.upd=char_halt currentFunc='halt' end
+   --check if we should fall
+ if char_shouldfall(c) then c.upd=char_fall currentFunc='fall' end
  -- update attacks
- if char_shouldattack(c) then c.upd=char_attack end
- -- check if we should halt
- if char_shouldhalt(c) then c.upd=char_halt end
- --check if we should fall
- if char_shouldfall(c) then c.upd=char_fall end
-  
+ if char_shouldattack(c) then c.upd=char_attack currentFunc='atk' end 
+end
  --do the thing we decided to do
  c.upd(c)
  c.x+=c.dx
@@ -54,11 +57,19 @@ function char_shouldknock(c)
 end
 
 function char_shouldwalk(c)
- if c.halt==false then 
+ if btn(0, ctrl) 
+ or btn(1, ctrl) 
+ or btn(2, ctrl) 
+ or btn(3, ctrl) then 
   return true
  else 
   return false 
  end
+end
+
+function char_idle(c)
+ c.shouldact=true
+ c.activespr=c.idlespr
 end
 
 function char_updatedir(c)
@@ -120,6 +131,7 @@ end
 
 function char_dash(c)
  local dist=1
+ c.shouldact=false
  if c.status.dashframe[1]>0 then
   if c.status.dashframe[2]=='<' then
    c.dx=-c.status.dashframe[1]
@@ -136,6 +148,7 @@ function char_dash(c)
   end
   c.status.dashframe[1]-=0.05
  end
+ c.shouldact=true
 end
 
 function char_updateinputbuffer(c)
@@ -154,6 +167,12 @@ function char_shouldattack(c)
 end 
 
 function char_attack(c)
+  if c.framecounter>0 then
+  c.framecounter-=1
+ else
+  c.activemove=0 
+  c.status.projectile=false
+ end
  attack_1(c)
  attack_2(c) 
 end
@@ -345,20 +364,10 @@ function char_backstep(c,d)
  end
 end
 
-function char_updateattacks(c)
- if c.framecounter>0 then
-  c.framecounter-=1
- else
-  c.activemove=0 
-  c.status.projectile=false
- end
- attack_1(c)
- attack_2(c)
-end
-
 function char_walk(c,d)
  local op=char_getop(c)
  local x=char_getcollisions(c)
+ char_updatewalldist(c)
  if c.halt==false then
   if d==0 and x.coll==false and c.lwalldist>=3 then
    c.dx=-0.5 c.xdir=-1 c.walk=true end

@@ -46,6 +46,8 @@ function _init()
      framecounter=0,
      activemove=0,
      halt=false,
+     shouldact=true,
+     upd=char_idle,
      status={hp=50,
              stocks=2,
              dashframe={0,nil},
@@ -87,6 +89,8 @@ function _init()
      framecounter=0,
      activemove=0,
      halt=false,
+     shouldact=true,
+     upd=char_idle,
      status={hp=50,
              stocks=2,
              attacking=false,
@@ -114,6 +118,8 @@ end
 
 function _draw()
  game.draw()
+ print(currentFunc,32,32)
+ print(p[1].shouldact,32,38)
 end
 
 function game_update()

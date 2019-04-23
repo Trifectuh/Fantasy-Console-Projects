@@ -8,6 +8,7 @@ function attack_1(c)
  local ctrl=c.id-1
  if btn(4, ctrl) and c.activemove==0 then
    c.status.attacking=true
+   c.shouldact=false
    attack_anim(c,m)
    c.activemove=1
  elseif c.activemove==1 then
@@ -24,6 +25,7 @@ function attack_1(c)
  else 
   c.status.attacking=false
   c.activemove=0
+  c.shouldact=true
   char_blockreset(op) end
 end
 
@@ -34,6 +36,7 @@ function attack_2(c)
  local opctrl=op.id-1
  if btn(5, ctrl) and c.activemove==0 then
    c.status.attacking=true
+   c.shouldact=false
    attack_anim(c,m)
    c.activemove=2
  elseif c.activemove==2 then
@@ -50,6 +53,7 @@ function attack_2(c)
  elseif c.activemove!=0 then c.status.attacking=true
  else 
   c.status.attacking=false
+  c.shouldact=true
   c.activemove=0
   char_blockreset(op) end
 end
