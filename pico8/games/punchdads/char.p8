@@ -8,31 +8,31 @@ function char_update(c)
   ctrl=c.id-1
   -- stop movement from last frame
   c.dx=0 c.dy=0
-   -- reset status
+  -- reset status
   c.halt=false
  
   -- update the input buffer
   char_updateinputbuffer(c)
-  --face the correct direction
+  -- face the correct direction
   char_face(c)
   -- check if fireballs hit us - move this elsewhere idiot!
   fb_hitcalc()
   -- get currently pressed dpad direction
   char_updatedir(c)
 
- -- update attacks
-  if char_shouldattack(c) then c.upd=char_attack currentFunc='atk' 
+  -- check if we should fall
+  if char_shouldfall(c) then c.upd=char_fall currentFunc='fall'
+  -- check if we should attack 
+  elseif char_shouldattack(c) then c.upd=char_attack currentFunc='atk' 
   -- slide if we get hit by something
   elseif char_shouldknock(c) then c.upd=char_knock currentFunc='knock' 
-  -- walk if we should walk
-  elseif char_shouldwalk(c) then c.upd=char_move currentFunc='walk'
-  -- dash if we should dash (broken)
-  elseif char_shoulddash(c) then c.upd=char_dash currentFunc='dash' 
-  -- check if we should halt
+  -- check if we should freeze
   elseif char_shouldhalt(c) then c.upd=char_halt currentFunc='halt' 
-  --check if we should fall
-  elseif char_shouldfall(c) then c.upd=char_fall currentFunc='fall' 
-  
+  -- dash if we should dash
+  elseif char_shoulddash(c) then c.upd=char_dash currentFunc='dash'
+  -- walk if we should walk
+  elseif char_shouldwalk(c) then c.upd=char_move currentFunc='walk'  
+  -- if nothing else just stand there
   else char_idle(c) end
  end
  --do the thing we decided to do
@@ -129,7 +129,7 @@ function char_dash(c)
   if c.status.dashframe[2]=='<' then
    c.dx=-c.status.dashframe[1]
    c.x+=c.dx end
-  if c.status.dashframe[2]=='>' then
+  if c.status.dashframe[2]=='>'> then
    c.dx=c.status.dashframe[1]
    c.x+=c.dx end
   if c.status.dashframe[2]=='^' then
