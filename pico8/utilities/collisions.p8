@@ -1,11 +1,8 @@
--- general collision functions
--- there are several different ones,
--- which should suit most needs.
+pico-8 cartridge // http://www.pico-8.com
+version 16
+__lua__
 
--- Contributors: Scathe (@clowerweb)
-
--- collisions with map tiles
--- checks for flag 0 on a tile
+-- general collision functions (flag0 on tile)
 function coll_map(o)
   local x1=o.x/8
   local y1=o.y/8
@@ -55,6 +52,3 @@ function coll_rough(a,b)
 
  return ax==bx and ay==by
 end
-
--- pixel perfect collision
--- coming soon!

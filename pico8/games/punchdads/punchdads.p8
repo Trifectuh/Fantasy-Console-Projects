@@ -118,6 +118,8 @@ end
 
 function _draw()
  game.draw()
+
+ -- for debugging character behavior
  print(currentFunc,32,32)
  print(p[1].shouldact,32,38)
 end

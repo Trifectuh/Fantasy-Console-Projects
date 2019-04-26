@@ -7,9 +7,6 @@ __lua__
 -- stopping on a specific frame, flipping
 -- horizontal and/or vertical, and playing
 -- in reverse
-
--- Contributors: Scathe (@clowerweb)
-
 function anim(a,anim,offx,offy)
  if(anim.loop!=false) then
   anim.loop=true

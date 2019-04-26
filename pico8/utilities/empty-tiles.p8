@@ -2,11 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 
--- makes a list of empty tiles on a map
--- checks for flag 0 on a tile
-
--- Contributors: Scathe (@clowerweb)
-
+-- makes a list of empty (no flag0) tiles on a map
 function empty_tiles(f)
  local cols=(w-8)/8
  local rows=(h-8)/8

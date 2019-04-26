@@ -2,9 +2,6 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 
--- taken from Star Picker-Upper by @seleb
--- http://www.lexaloffle.com/bbs/?tid=3432
-
 -- print white text with dark blue outline
 function print_ol(s,_x,_y)
   for x=-1,1 do

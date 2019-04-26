@@ -3,10 +3,6 @@ version 16
 __lua__
 
 --Methods for handling math between 2D vectors
--- Vectors are tables with x,y variables inside
-
--- Contributors: WarrenM
-
 -- Add v1 to v2
 function v_addv( v1, v2 )
   return { x = v1.x + v2.x, y = v1.y + v2.y }
